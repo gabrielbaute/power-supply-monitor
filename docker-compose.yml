@@ -1,0 +1,15 @@
+services:
+  power-monitor:
+    build: .
+    container_name: power_supply_monitor
+    restart: always
+    environment:
+      - NTFY_URL=https://ntfy.sh
+      - NTFY_TOPIC=tu_topic_privado
+      - SUPPLY_PATH=/sys/class/power_supply
+      - AC_SUPPLY_NAME=AC0
+      - CHECK_INTERVAL=5
+      - LOG_LEVEL=INFO
+    volumes:
+      - /sys/class/power_supply:/sys/class/power_supply:ro
+      - ./logs:/app/logs
