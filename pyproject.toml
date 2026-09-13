@@ -1,11 +1,16 @@
 [project]
 name = "power-supply-monitor"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.0.0"
+description = "Una sencilla aplicación en python para alertar si hay fallas en el suministro eléctrico."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "requests>=2.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "bumpver>=2026.1132",
 ]
