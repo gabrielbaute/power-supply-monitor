@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # ----------- POWER SYSTEM ------------
     CHECK_INTERVAL: int = 5
     SUPPLY_PATH: Path = Path("/sys/class/power_supply")
+    AC_SUPPLY_NAME: str = "AC0"
 
     # ----------- WEBHOOKS ------------
     NTFY_TOPIC: str
