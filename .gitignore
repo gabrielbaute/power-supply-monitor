@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+.ruff_cache/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv/
+venv/
+
+# Repomix
+repomix-output.xml
+
+# Variables de entorno
+*.env
+
+# Logs
+logs/
+*.log
