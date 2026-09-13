@@ -81,6 +81,7 @@ class PowerMonitorManager:
                     self.is_ac_connected = current_ac_status
 
                     if not self.is_ac_connected:
+                        self.logger.info("Energía desconectada, enviando notificación.")
                         ntfy_payload = self._build_ntfy_message(
                             title="[!] ALERTA: CORTE DE ENERGIA",
                             event="SUMINISTRO DESCONECTADO",
@@ -90,6 +91,7 @@ class PowerMonitorManager:
                         )
                         self.ntfy_service.emit(payload=ntfy_payload)
                     else:
+                        self.logger.info("Energía restituida, enviando notificación.")
                         ntfy_payload = self._build_ntfy_message(
                             title="[OK] RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
