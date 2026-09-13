@@ -82,7 +82,7 @@ class PowerMonitorManager:
 
                     if not self.is_ac_connected:
                         ntfy_payload = self._build_ntfy_message(
-                            title="🔴 CORTE DE ENERGÍA DETECTADO",
+                            title="[!] ALERTA: CORTE DE ENERGIA",
                             event="SUMINISTRO DESCONECTADO",
                             message="El servidor ha perdido la alimentación de red y está operando con BATERÍA.",
                             priority=NTFYPriority.MAX,
@@ -91,7 +91,7 @@ class PowerMonitorManager:
                         self.ntfy_service.emit(payload=ntfy_payload)
                     else:
                         ntfy_payload = self._build_ntfy_message(
-                            title="🟢 ENERGÍA RESTABLECIDA",
+                            title="[OK] RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
                             message="El suministro eléctrico se ha restaurado. El servidor vuelve a cargar la batería.",
                             priority=NTFYPriority.DEFAULT,
