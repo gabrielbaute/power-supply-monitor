@@ -6,7 +6,6 @@ from app.schemas import WebhookPayload
 from app.services import NtfysService, PowerMonitorService
 from app.settings import Settings
 
-
 class PowerMonitorManager:
     """Mánager principal para orquestar la lectura de energía y el envío de notificaciones.
 
@@ -21,7 +20,6 @@ class PowerMonitorManager:
     def __init__(
         self,
         settings_instance: Settings,
-        ac_supply_name: str = "AC0",
     ) -> None:
         """Inicializa el mánager y establece el estado inicial del suministro.
 
@@ -32,11 +30,10 @@ class PowerMonitorManager:
         self.settings = settings_instance
         self.logger = logging.getLogger(self.__class__.__name__)
         self.power_monitor_service = PowerMonitorService(
-            settings=settings_instance, ac_supply_name=settings_instance.AC_SUPPLY_NAME
+            settings=settings_instance,
+            ac_supply_name=settings_instance.AC_SUPPLY_NAME
         )
         self.ntfy_service = NtfysService(settings=settings_instance)
-
-        # Estado inicial para evitar notificaciones al arrancar
         self.is_ac_connected: bool = self.power_monitor_service.read_ac_status()
 
     def _build_ntfy_message(

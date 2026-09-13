@@ -3,7 +3,6 @@ from pathlib import Path
 
 from app.settings import Settings
 
-
 class PowerMonitorService:
     """Servicio de monitoreo del estado de la fuente de alimentación AC del sistema.
 
