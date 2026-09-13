@@ -1,0 +1,1 @@
+from app.managers.power_monitor_manager import PowerMonitorManager
