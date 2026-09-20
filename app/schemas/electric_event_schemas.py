@@ -11,14 +11,14 @@ class ElectricEventCreate(BaseModel):
 
     Attributes:
         id (UUID): ID de registro de la falla/evento eléctrico.
-        start_timestamp (datetime): Marca de tiempo de inicio del evento.
+        start_timestamp (Optional[datetime]): Marca de tiempo de inicio del evento.
         end_timestamp (Optional[datetime]): Marca de tiempo de finalización del evento.
         latitude (float): Latitud de la ubicación desde donde se emite el registro de evento.
         longitude (float): Longitud de la ubicación desde donde se emite el registro de evento.
         event_type (EventType): Tipo de evento, corte o fluctuación.
     """
     id: UUID
-    start_timestamp: datetime
+    start_timestamp: Optional[datetime] = None
     end_timestamp: Optional[datetime] = None
     latitude: float
     longitude: float
