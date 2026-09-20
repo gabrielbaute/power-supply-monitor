@@ -4,7 +4,7 @@ from uuid import uuid4
 from pydantic import HttpUrl
 from httpx import AsyncClient
 from typing import Any, Dict, Optional
-from datetime import datetime, UTC, timezone
+from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.settings import Settings
@@ -57,7 +57,7 @@ class PowerMonitorManager:
         """
         return ElectricEventCreate(
             id=uuid4(),
-            start_timestamp=datetime.now(),
+            start_timestamp=datetime.now(UTC),
             latitude=self.settings.LATITUDE,
             longitude=self.settings.LONGITUDE,
             event_type=EventType.CORTE
