@@ -56,7 +56,6 @@ class PowerMonitorManager:
             ElectricEventCreate: esquema de creación de registro de un evento eléctrico
         """
         return ElectricEventCreate(
-            id=uuid4(),
             start_timestamp=datetime.now(UTC),
             latitude=self.settings.LATITUDE,
             longitude=self.settings.LONGITUDE,
