@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     AC_SUPPLY_NAME: str = "AC0"
 
     # ----------- SERVER LOCATION ------------
-    LATITUDE: int
-    LONGITUDE: int
+    LATITUDE: float
+    LONGITUDE: float
 
     # ----------- WEBHOOKS ------------
     NTFY_TOPIC: str
