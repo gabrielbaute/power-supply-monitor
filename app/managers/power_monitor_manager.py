@@ -29,7 +29,6 @@ class PowerMonitorManager:
 
         Args:
             settings_instance (Settings): Instancia de configuraciones de la app.
-            ac_supply_name (str, optional): Nombre de la interfaz AC. Defaults to "AC0".
         """
         self.settings = settings_instance
         self._client = AsyncClient()
