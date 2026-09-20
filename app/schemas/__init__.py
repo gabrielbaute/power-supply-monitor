@@ -1,1 +1,1 @@
-from app.schemas.webhook_payload_schemas import WebhookPayload
+from app.schemas.ntfy_schema import NTFYPayload
