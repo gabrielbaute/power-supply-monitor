@@ -5,9 +5,11 @@ description = "Una sencilla aplicación en python para alertar si hay fallas en 
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "aiosqlite>=0.22.1",
     "httpx>=0.28.1",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
+    "sqlmodel>=0.0.42",
 ]
 
 [dependency-groups]

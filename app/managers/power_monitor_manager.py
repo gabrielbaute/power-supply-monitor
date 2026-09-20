@@ -1,13 +1,16 @@
 import asyncio
 import logging
+from uuid import uuid4
 from pydantic import HttpUrl
 from httpx import AsyncClient
 from typing import Any, Dict, Optional
+from datetime import datetime, UTC
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums import NTFYPriority
-from app.schemas import NTFYPayload
-from app.services import NtfysService, PowerMonitorService
 from app.settings import Settings
+from app.enums import NTFYPriority, EventType
+from app.schemas import NTFYPayload, ElectricEventCreate, ElectricEventResponse
+from app.services import ElectricEventService, NtfysService, PowerMonitorService
 
 class PowerMonitorManager:
     """Mánager principal para orquestar la lectura de energía y el envío de notificaciones.
@@ -22,6 +25,7 @@ class PowerMonitorManager:
 
     def __init__(
         self,
+        database_session: AsyncSession,
         settings_instance: Settings,
     ) -> None:
         """
@@ -41,7 +45,22 @@ class PowerMonitorManager:
             settings=settings_instance,
             client=self._client
         )
+        self.electric_event_service = ElectricEventService(database_session=database_session)
         self.is_ac_connected: bool = self.power_monitor_service.read_ac_status()
+
+    def _build_event_register(self, ) -> ElectricEventCreate:
+        """
+        Genera el reporte de evento eléctrico para la base de datos.
+
+        Return:
+            ElectricEventCreate: esquema de creación de registro de un evento eléctrico
+        """
+        return ElectricEventCreate(
+            start_timestamp=datetime.now(UTC),
+            latitude=self.settings.LATITUDE,
+            longitude=self.settings.LONGITUDE,
+            event_type=EventType.CORTE
+        )
 
     def _build_ntfy_message(
         self,
@@ -108,14 +127,27 @@ class PowerMonitorManager:
                             priority=NTFYPriority.MAX,
                             tags="warning,zap",
                         )
+                        event_register = self._build_event_register()
+                        await self.electric_event_service.register_event(event_data=event_register)
                         await self.ntfy_service.emit(payload=ntfy_payload)
                         await self.ntfy_service.close()
                     else:
                         self.logger.info("Energía restituida, enviando notificación.")
+                        closed_event = await self.electric_event_service.close_last_open_event()
+                        duration: Any = ""
+                        if closed_event:
+                            duration = closed_event.end_timestamp - closed_event.start_timestamp # type: ignore
+                            self.logger.info(
+                                f"Evento {closed_event.id} cerrado. Duración: {duration}."
+                            )
+
                         ntfy_payload = self._build_ntfy_message(
                             title="RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
-                            description="El suministro eléctrico se ha restaurado. El servidor vuelve a cargar la batería.",
+                            description=(
+                                f"El suministro eléctrico se ha restaurado tras {duration}. "
+                                "El servidor vuelve a cargar la batería."
+                            ) if closed_event else "El suministro eléctrico se ha restaurado.",
                             priority=NTFYPriority.DEFAULT,
                             tags="heavy_check_mark,electric_plug",
                         )

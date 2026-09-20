@@ -11,6 +11,12 @@ wheels/
 .venv/
 venv/
 
+# Base de datos
+instance/
+*.db
+*.db-shm
+*.db-wal
+
 # Repomix
 repomix-output.xml
 
