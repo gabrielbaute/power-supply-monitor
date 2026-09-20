@@ -10,6 +10,8 @@ services:
       - AC_SUPPLY_NAME=AC0
       - CHECK_INTERVAL=5
       - LOG_LEVEL=INFO
+      - LATITUDE=0.0
+      - LONGITUDE=0.0
     volumes:
       - /sys/class/power_supply:/sys/class/power_supply:ro
       - ./logs:/app/logs
