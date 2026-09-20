@@ -3,7 +3,7 @@
 import logging
 from uuid import UUID
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import EventType
@@ -28,6 +28,32 @@ class ElectricEventService:
     async def get_event_by_id(self, event_id: UUID) -> Optional[ElectricEventResponse]:
         event_register = await self.controller.get_event_by_id(event_id=event_id)
         return event_register
+
+    async def close_last_open_event(
+        self,
+        end_timestamp: Optional[datetime] = None
+    ) -> Optional[ElectricEventResponse]:
+        """
+        Cierra el último evento eléctrico abierto asignándole su marca de finalización.
+
+        Args:
+            end_timestamp (Optional[datetime]): Marca de tiempo de finalización.
+                Si es None, se usa la hora actual en UTC.
+
+        Returns:
+            Optional[ElectricEventResponse]: El evento actualizado, o None si no había eventos abiertos.
+        """
+        last_open_event = await self.controller.get_last_open_event()
+        if last_open_event is None:
+            self.logger.warning("No se encontró ningún evento abierto para cerrar.")
+            return None
+
+        return await self.update_event(
+            event_id=last_open_event.id,
+            event_data=ElectricEventUpdate(
+                end_timestamp=end_timestamp or datetime.now(UTC)
+            )
+        )
 
     async def get_events_by_event_type(
         self,

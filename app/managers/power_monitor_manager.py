@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.settings import Settings
 from app.enums import NTFYPriority, EventType
-from app.schemas import NTFYPayload, ElectricEventCreate
+from app.schemas import NTFYPayload, ElectricEventCreate, ElectricEventResponse
 from app.services import ElectricEventService, NtfysService, PowerMonitorService
 
 class PowerMonitorManager:
@@ -133,6 +133,13 @@ class PowerMonitorManager:
                         await self.ntfy_service.close()
                     else:
                         self.logger.info("Energía restituida, enviando notificación.")
+                        closed_event = await self.electric_event_service.close_last_open_event()
+                        if closed_event:
+                            duration = closed_event.end_timestamp - closed_event.start_timestamp # type: ignore
+                            self.logger.info(
+                                f"Evento {closed_event.id} cerrado. Duración: {duration}."
+                            )
+
                         ntfy_payload = self._build_ntfy_message(
                             title="RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
@@ -140,8 +147,6 @@ class PowerMonitorManager:
                             priority=NTFYPriority.DEFAULT,
                             tags="heavy_check_mark,electric_plug",
                         )
-                        # TODO: Crear lógica que recupere el último evento del servidor
-                        # y cuando se restituye la electicidad, se envía la actualización de este evento.
                         await self.ntfy_service.emit(payload=ntfy_payload)
                         await self.ntfy_service.close()
 

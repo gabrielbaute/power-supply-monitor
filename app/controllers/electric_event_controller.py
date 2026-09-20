@@ -108,6 +108,18 @@ class ElectricEventController(
             return None
         return ElectricEventResponse.model_validate(event.model_dump())
 
+    async def get_last_open_event(self) -> Optional[ElectricEventSQLModel]:
+        """
+        Obtiene el último evento eléctrico registrado que aún no tiene marca de finalización.
+
+        Returns:
+            Optional[ElectricEventSQLModel]: El evento abierto más reciente, o None si no hay ninguno.
+        """
+        return await self.get_last_register_with_conditions(
+            where_clause=[ElectricEventSQLModel.end_timestamp==None],
+            sort_by_attribute="start_timestamp"
+        )
+
     async def get_events_by_event_type(
         self,
         event_type: EventType,
