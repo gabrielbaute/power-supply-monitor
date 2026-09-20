@@ -15,3 +15,4 @@ services:
     volumes:
       - /sys/class/power_supply:/sys/class/power_supply:ro
       - ./logs:/app/logs
+      - ./instance:/app/instance
