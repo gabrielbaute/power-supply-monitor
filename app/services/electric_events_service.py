@@ -22,6 +22,7 @@ class ElectricEventService:
 
     async def register_event(self, event_data: ElectricEventCreate) -> Optional[ElectricEventResponse]:
         event_register = await self.controller.register_event(event_data=event_data)
+        self.logger.info(f"Evento electrico registrado en la db: {event_register.event_type.value}")
         return event_register
 
     async def get_event_by_id(self, event_id: UUID) -> Optional[ElectricEventResponse]:
@@ -61,6 +62,7 @@ class ElectricEventService:
             event_id=event_id,
             event_data=event_data
         )
+        self.logger.info(f"Registro de evento actualizado: {updated_event.id.__str__()}")
         return updated_event
 
     async def delete_event(self, event_id: UUID) -> Optional[ElectricEventResponse]:
