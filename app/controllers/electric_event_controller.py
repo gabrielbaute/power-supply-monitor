@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.enums import EventType
 from app.controllers.base_controller import AsyncBaseController
 from app.errors import RegisterNotFoundError, DatabaseOperationError
-from app.database.models.electric_eventl_sql_model import ElectricEventSQLModel
+from app.database.models.electric_event_sql_model import ElectricEventSQLModel
 from app.schemas.electric_event_schemas import (
     ElectricEventCreate,
     ElectricEventUpdate,
@@ -59,7 +59,7 @@ class ElectricEventController(
 
     async def _get_or_raise(self, event_id: UUID) -> ElectricEventSQLModel:
         """
-        Obtiene un registro de usuario especÃ­fico o genere una excepciÃ³n.
+        Obtiene un registro de usuario específico o genere una excepción.
 
         Args:
             event_id (UUID): Identificador de clave primaria de la base de datos.
