@@ -1,1 +1,1 @@
-from app.database.models.electric_eventl_sql_model import ElectricEventSQLModel
+from app.database.models.electric_event_sql_model import ElectricEventSQLModel
