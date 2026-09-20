@@ -1,13 +1,17 @@
 import asyncio
 import logging
+from uuid import uuid4
 from pydantic import HttpUrl
 from httpx import AsyncClient
 from typing import Any, Dict, Optional
+from datetime import datetime, UTC, timezone
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.enums import NTFYPriority
-from app.schemas import NTFYPayload
-from app.services import NtfysService, PowerMonitorService
+from app import settings
 from app.settings import Settings
+from app.enums import NTFYPriority, EventType
+from app.schemas import NTFYPayload, ElectricEventCreate
+from app.services import ElectricEventService, NtfysService, PowerMonitorService
 
 class PowerMonitorManager:
     """Mánager principal para orquestar la lectura de energía y el envío de notificaciones.
@@ -22,6 +26,7 @@ class PowerMonitorManager:
 
     def __init__(
         self,
+        database_session: AsyncSession,
         settings_instance: Settings,
     ) -> None:
         """
@@ -41,7 +46,23 @@ class PowerMonitorManager:
             settings=settings_instance,
             client=self._client
         )
+        self.electric_event_service = ElectricEventService(database_session=database_session)
         self.is_ac_connected: bool = self.power_monitor_service.read_ac_status()
+
+    def _build_event_register(self, ) -> ElectricEventCreate:
+        """
+        Genera el reporte de evento eléctrico para la base de datos.
+
+        Return:
+            ElectricEventCreate: esquema de creación de registro de un evento eléctrico
+        """
+        return ElectricEventCreate(
+            id=uuid4(),
+            start_timestamp=datetime.now(),
+            latitude=self.settings.LATITUDE,
+            longitude=self.settings.LONGITUDE,
+            event_type=EventType.CORTE
+        )
 
     def _build_ntfy_message(
         self,
@@ -108,6 +129,8 @@ class PowerMonitorManager:
                             priority=NTFYPriority.MAX,
                             tags="warning,zap",
                         )
+                        event_register = self._build_event_register()
+                        await self.electric_event_service.register_event(event_data=event_register)
                         await self.ntfy_service.emit(payload=ntfy_payload)
                         await self.ntfy_service.close()
                     else:
@@ -119,6 +142,8 @@ class PowerMonitorManager:
                             priority=NTFYPriority.DEFAULT,
                             tags="heavy_check_mark,electric_plug",
                         )
+                        # TODO: Crear lógica que recupere el último evento del servidor
+                        # y cuando se restituye la electicidad, se envía la actualización de este evento.
                         await self.ntfy_service.emit(payload=ntfy_payload)
                         await self.ntfy_service.close()
 
