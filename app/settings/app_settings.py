@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     # ------------ Directories and config path ------------
     # Directory and path config
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
+    INSTANCE_DIR: Path = BASE_DIR / "instance"
     LOGS_DIR: Path = BASE_DIR / "logs"
 
     # ----------- LOGGING -------------
@@ -32,6 +33,13 @@ class Settings(BaseSettings):
     NTFY_TOPIC: str
     NTFY_URL: str
 
+    # ----------- DATABASE ------------
+    DATABASE_URL: str = str(f"sqlite+aiosqlite:///{INSTANCE_DIR / f'{APP_NAME.lower()}_database.db'}")
+    DATABASE_ECHO: bool = False
+    DATABASE_POOL_SIZE: int = 5
+    DATABASE_POOL_RECYCLE: int = 3600
+    DATABASE_POOL_TIMEOUT: int = 30
+    DATABASE_POOL_PRE_PING: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -49,6 +57,7 @@ class Settings(BaseSettings):
     def ensure_dirs(self) -> None:
         try:
             self.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+            self.INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
         except OSError as e:
             print(f" CRITICAL ERROR: Could not create directory {dir}. check permissions.")
             sys.exit(1)
