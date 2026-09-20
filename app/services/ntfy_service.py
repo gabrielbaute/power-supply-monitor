@@ -1,76 +1,119 @@
+import httpx
 import logging
-import requests
 from typing import Dict, Optional
 
+from app.schemas import NTFYPayload
 from app.settings import Settings
-from app.schemas import WebhookPayload
 
 class NtfysService:
-    """
-    Service class to handle NTFY notifications asynchronously.
-    """
-    def __init__(self, settings: Settings):
-        """Initializes the Ntfy service with configuration."""
-        self.topic = settings.NTFY_TOPIC
-        self.base_url = settings.NTFY_URL
-        self.webhook_url = f"{self.base_url.rstrip('/')}/{self.topic}"
+    """Servicio para emitir notificaciones asíncronas a través de NTFY."""
+
+    def __init__(self, settings: Settings, client: Optional[httpx.AsyncClient] = None) -> None:
+        """
+        Inicializa el servicio NTFY con la configuración y un cliente HTTP asíncrono.
+
+        Args:
+            settings (Settings): Instancia con la configuración general de la aplicación.
+            client (Optional[httpx.AsyncClient]): Cliente asíncrono de HTTPX reutilizable.
+        """
+        self.settings = settings
+        self.webhook_url = f"{self.settings.NTFY_URL.rstrip('/')}/{self.settings.NTFY_TOPIC}"
         self.app_name = settings.APP_NAME
         self.app_version = settings.APP_VERSION
         self.logger = logging.getLogger(self.__class__.__name__)
+        self._client = client
 
-    def _format_message(self, payload: WebhookPayload) -> str:
+    async def _get_client(self) -> httpx.AsyncClient:
         """
-        Formatear el mensaje para NTFY.
+        Obtiene o crea un cliente HTTPX asíncrono.
+
+        Returns:
+            httpx.AsyncClient: Cliente de red asíncrono.
+        """
+        if self._client is None or self._client.is_closed:
+            self._client = httpx.AsyncClient(timeout=10.0)
+        return self._client
+
+    def _format_message(self, payload: NTFYPayload) -> str:
+        """
+        Formatea el cuerpo del mensaje priorizando el contenido principal y firmando al final.
 
         Args:
-            payload (WebhookPayload): Content of the notification.
-        Returns:
-            str: Message to send.
-        """
-        msg = f"[{payload.event}] {self.app_name} v{self.app_version} → {payload.description}"
-        return msg
+            payload (NTFYPayload): Estructura de datos de la notificación.
 
-    def _format_headers(self, payload: WebhookPayload) -> Dict[str, str]:
+        Returns:
+            str: Mensaje formateado en Markdown.
         """
-        Format the headers for NTFY.
+        body_parts = [payload.description]
+        footer = f"— *{self.app_name}* `v{self.app_version}`"
+        body_parts.append(footer)
+
+        return "\n\n".join(body_parts)
+
+    def _format_headers(self, payload: NTFYPayload) -> Dict[str, str]:
+        """
+        Genera los encabezados HTTP según las especificaciones de NTFY.
 
         Args:
-            payload (WebhookPayload): Content of the notification.
+            payload (NTFYPayload): Contenido de la notificación.
+
         Returns:
-            Dict[str, str]: A dictionary with the headers.
+            Dict[str, str]: Diccionario con las cabeceras formateadas.
         """
-        headers = {
-            "Priority": payload.priority.value,
+        headers: Dict[str, str] = {
+            "Priority": str(payload.priority.value),
             "Tags": payload.tags if payload.tags else "robot",
-            "Topic": self.topic,
-            "Markdown": "yes"
+            "Markdown": "yes",
         }
+
+        # El título en la cabecera es independiente del cuerpo
         if payload.title:
             headers["Title"] = payload.title
         else:
             headers["Title"] = f"{self.app_name} - {payload.event}"
-        if payload.tags:
-            headers["Tags"] = payload.tags
-        if payload.url:
+
+        if payload.click:
+            headers["Click"] = payload.click
+        elif payload.url:
             headers["Click"] = payload.url
+
+        if payload.icon:
+            headers["Icon"] = str(payload.icon)
+
         return headers
 
-    def emit(self, payload: WebhookPayload) -> Optional[int]:
+    async def emit(self, payload: NTFYPayload) -> Optional[int]:
         """
-        Emit a NTFY notification
+        Emite una notificación a NTFY de forma asíncrona.
 
         Args:
-            payload (WebhookPayload): Notification content.
+            payload (NTFYPayload): Contenido estructurado de la notificación.
+
         Returns:
-            Optional[int]: Status code of the notification.
+            Optional[int]: Código de estado HTTP retornado por el servidor NTFY.
         """
         message = self._format_message(payload)
         headers = self._format_headers(payload)
+        client = await self._get_client()
+
         try:
-            response = requests.post(self.webhook_url, data=message.encode("utf-8"), headers=headers)
+            response = await client.post(
+                self.webhook_url,
+                content=message.encode("utf-8"),
+                headers=headers,
+            )
             response.raise_for_status()
-            self.logger.debug(f"Ntfy notification sent successfully. Status code: {response.status_code}")
+            self.logger.debug(
+                f"Notificación NTFY enviada exitosamente. Status code: {response.status_code}"
+            )
             return response.status_code
-        except requests.RequestException as e:
-            self.logger.error(f"Error sending Ntfy notification: {e}")
+        except httpx.HTTPError as e:
+            self.logger.error(f"Error al enviar notificación NTFY: {e}")
             return None
+
+    async def close(self) -> None:
+        """
+        Cierra el cliente HTTPX asíncrono si está activo.
+        """
+        if self._client and not self._client.is_closed:
+            await self._client.aclose()
