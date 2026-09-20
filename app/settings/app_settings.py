@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     SUPPLY_PATH: Path = Path("/sys/class/power_supply")
     AC_SUPPLY_NAME: str = "AC0"
 
+    # ----------- SERVER LOCATION ------------
+    LATITUDE: int
+    LONGITUDE: int
+
     # ----------- WEBHOOKS ------------
     NTFY_TOPIC: str
     NTFY_URL: str
