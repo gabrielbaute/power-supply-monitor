@@ -1,8 +1,11 @@
+import asyncio
 import logging
-import time
+from pydantic import HttpUrl
+from httpx import AsyncClient
+from typing import Any, Dict, Optional
 
 from app.enums import NTFYPriority
-from app.schemas import WebhookPayload
+from app.schemas import NTFYPayload
 from app.services import NtfysService, PowerMonitorService
 from app.settings import Settings
 
@@ -21,50 +24,67 @@ class PowerMonitorManager:
         self,
         settings_instance: Settings,
     ) -> None:
-        """Inicializa el mánager y establece el estado inicial del suministro.
+        """
+        Inicializa el mánager y establece el estado inicial del suministro.
 
         Args:
             settings_instance (Settings): Instancia de configuraciones de la app.
             ac_supply_name (str, optional): Nombre de la interfaz AC. Defaults to "AC0".
         """
         self.settings = settings_instance
+        self._client = AsyncClient()
         self.logger = logging.getLogger(self.__class__.__name__)
         self.power_monitor_service = PowerMonitorService(
             settings=settings_instance,
             ac_supply_name=settings_instance.AC_SUPPLY_NAME
         )
-        self.ntfy_service = NtfysService(settings=settings_instance)
+        self.ntfy_service = NtfysService(
+            settings=settings_instance,
+            client=self._client
+        )
         self.is_ac_connected: bool = self.power_monitor_service.read_ac_status()
 
     def _build_ntfy_message(
         self,
-        title: str,
         event: str,
-        message: str,
-        priority: NTFYPriority,
-        tags: str,
-    ) -> WebhookPayload:
-        """Organiza los datos del evento en un esquema WebhookPayload para NTFY.
+        description: Optional[str] = None,
+        title: Optional[str] = None,
+        priority: NTFYPriority = NTFYPriority.DEFAULT,
+        tags: Optional[str] = None,
+        click: Optional[str] = None,
+        icon: Optional[HttpUrl] = None,
+        url: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> NTFYPayload:
+        """Construye un objeto NTFYPayload con los argumentos proporcionados.
 
         Args:
-            title (str): Título principal de la notificación.
-            event (str): Identificador del evento.
-            message (str): Descripción o contenido del evento.
-            priority (NTFYPriority): Prioridad de envío.
-            tags (str): Lista de tags/emojis separados por comas.
+            event (str): Nombre del evento.
+            description (str): Descripción o cuerpo del mensaje.
+            title (Optional[str]): Título opcional de la notificación.
+            priority (NTFYPriority): Prioridad de la notificación.
+            tags (Optional[str]): Etiquetas separadas por comas o emojis.
+            click (Optional[str]): Enlace al hacer clic.
+            icon (Optional[HttpUrl]): URL del icono/logo de la aplicación.
+            url (Optional[str]): URL opcional adjunta.
+            data (Optional[Dict[str, Any]]): Metadatos adicionales.
 
         Returns:
-            WebhookPayload: Instancia validada con el mensaje formateado.
+            NTFYPayload: Instancia formateada del esquema de notificación.
         """
-        return WebhookPayload(
-            title=title,
+        return NTFYPayload(
             event=event,
-            description=message,
+            description=description,
+            title=title,
             priority=priority,
             tags=tags,
+            click=click,
+            icon=icon,
+            url=url,
+            data=data,
         )
 
-    def run(self) -> None:
+    async def run(self) -> None:
         """Ejecuta el bucle principal de monitoreo continuo."""
         self.logger.info(
             f"Iniciando monitoreo de energía en: {self.power_monitor_service.sysfs_ac_path}"
@@ -83,25 +103,27 @@ class PowerMonitorManager:
                     if not self.is_ac_connected:
                         self.logger.info("Energía desconectada, enviando notificación.")
                         ntfy_payload = self._build_ntfy_message(
-                            title="[!] ALERTA: CORTE DE ENERGIA",
+                            title="ALERTA: CORTE DE ENERGIA",
                             event="SUMINISTRO DESCONECTADO",
-                            message="El servidor ha perdido la alimentación de red y está operando con BATERÍA.",
+                            description="El servidor ha perdido la alimentación de red y está operando con BATERÍA.",
                             priority=NTFYPriority.MAX,
                             tags="warning,zap",
                         )
-                        self.ntfy_service.emit(payload=ntfy_payload)
+                        await self.ntfy_service.emit(payload=ntfy_payload)
+                        await self.ntfy_service.close()
                     else:
                         self.logger.info("Energía restituida, enviando notificación.")
                         ntfy_payload = self._build_ntfy_message(
-                            title="[OK] RESTABLECIDO: ENERGIA AC",
+                            title="RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
-                            message="El suministro eléctrico se ha restaurado. El servidor vuelve a cargar la batería.",
+                            description="El suministro eléctrico se ha restaurado. El servidor vuelve a cargar la batería.",
                             priority=NTFYPriority.DEFAULT,
                             tags="heavy_check_mark,electric_plug",
                         )
-                        self.ntfy_service.emit(payload=ntfy_payload)
+                        await self.ntfy_service.emit(payload=ntfy_payload)
+                        await self.ntfy_service.close()
 
             except Exception as loop_error:
                 self.logger.error(f"[Error en loop]: {loop_error}")
 
-            time.sleep(self.settings.CHECK_INTERVAL)
+            await asyncio.sleep(self.settings.CHECK_INTERVAL)
