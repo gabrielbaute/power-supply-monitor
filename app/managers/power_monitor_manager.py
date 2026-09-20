@@ -134,6 +134,7 @@ class PowerMonitorManager:
                     else:
                         self.logger.info("Energía restituida, enviando notificación.")
                         closed_event = await self.electric_event_service.close_last_open_event()
+                        duration: Any = ""
                         if closed_event:
                             duration = closed_event.end_timestamp - closed_event.start_timestamp # type: ignore
                             self.logger.info(
@@ -143,7 +144,10 @@ class PowerMonitorManager:
                         ntfy_payload = self._build_ntfy_message(
                             title="RESTABLECIDO: ENERGIA AC",
                             event="SUMINISTRO RESTITUIDO",
-                            description="El suministro eléctrico se ha restaurado. El servidor vuelve a cargar la batería.",
+                            description=(
+                                f"El suministro eléctrico se ha restaurado tras {duration}. "
+                                "El servidor vuelve a cargar la batería."
+                            ) if closed_event else "El suministro eléctrico se ha restaurado.",
                             priority=NTFYPriority.DEFAULT,
                             tags="heavy_check_mark,electric_plug",
                         )
