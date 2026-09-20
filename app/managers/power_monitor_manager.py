@@ -7,7 +7,6 @@ from typing import Any, Dict, Optional
 from datetime import datetime, UTC, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import settings
 from app.settings import Settings
 from app.enums import NTFYPriority, EventType
 from app.schemas import NTFYPayload, ElectricEventCreate
