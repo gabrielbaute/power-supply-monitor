@@ -1,0 +1,72 @@
+"""Módulo de servicio de registro de eventos eléctricos."""
+
+import logging
+from uuid import UUID
+from typing import Optional
+from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.enums import EventType
+from app.controllers import ElectricEventController
+from app.schemas.electric_event_schemas import (
+    ElectricEventCreate,
+    ElectricEventListResponse,
+    ElectricEventResponse,
+    ElectricEventUpdate,
+)
+
+class ElectricEventService:
+    def __init__(self, database_session: AsyncSession):
+        self.controller = ElectricEventController(database_session=database_session)
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    async def register_event(self, event_data: ElectricEventCreate) -> Optional[ElectricEventResponse]:
+        event_register = await self.controller.register_event(event_data=event_data)
+        return event_register
+
+    async def get_event_by_id(self, event_id: UUID) -> Optional[ElectricEventResponse]:
+        event_register = await self.controller.get_event_by_id(event_id=event_id)
+        return event_register
+
+    async def get_events_by_event_type(
+        self,
+        event_type: EventType,
+        skip: int = 0,
+        limit: int = 100
+    ) -> ElectricEventListResponse:
+        event_registers = await self.controller.get_events_by_event_type(
+            event_type=event_type,
+            skip=skip,
+            limit=limit
+        )
+        return event_registers
+
+    async def get_events_by_date_range(
+        self,
+        start_date: datetime,
+        end_date: datetime,
+        skip: int = 0,
+        limit: int = 100
+    ) -> ElectricEventListResponse:
+        event_registers = await self.controller.get_events_by_date_range(
+            start_date=start_date,
+            end_date=end_date,
+            skip=skip,
+            limit=limit
+        )
+        return event_registers
+
+    async def update_event(self, event_id: UUID, event_data: ElectricEventUpdate) -> Optional[ElectricEventResponse]:
+        updated_event = await self.controller.update_event(
+            event_id=event_id,
+            event_data=event_data
+        )
+        return updated_event
+
+    async def delete_event(self, event_id: UUID) -> Optional[ElectricEventResponse]:
+        event = await self.get_event_by_id(event_id=event_id)
+        if not event:
+            self.logger.warning(f"Evento {event_id} no encontrado.")
+            return None
+
+        return await self.controller.delete_event(event_id=event_id)
