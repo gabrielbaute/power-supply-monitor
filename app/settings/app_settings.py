@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     NTFY_TOPIC: str
     NTFY_URL: str
 
+    # ----------- DEBOUNCE ------------
+    CONFIRMATION_READS: int = 3  # lecturas consecutivas para confirmar un cambio de estado
+
     # ----------- DATABASE ------------
     DATABASE_URL: str = str(f"sqlite+aiosqlite:///{INSTANCE_DIR / f'{APP_NAME.lower()}_database.db'}")
     DATABASE_ECHO: bool = False

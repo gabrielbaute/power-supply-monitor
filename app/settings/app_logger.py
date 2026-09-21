@@ -32,6 +32,21 @@ class PSMLogger:
     }
 
     @staticmethod
+    def _configure_third_party_loggers(level_name: str) -> None:
+        """
+        Adjust verbosity for third-party loggers such as httpx and httpcore.
+
+        Args:
+            level_name (str): Log level string name (e.g., "DEBUG", "INFO").
+
+        Returns:
+            None
+        """
+        httpx_level = logging.DEBUG if level_name.upper() == "DEBUG" else logging.WARNING
+        logging.getLogger("httpx").setLevel(httpx_level)
+        logging.getLogger("httpcore").setLevel(httpx_level)
+
+    @staticmethod
     def setup_logging(logs_dir: Path, level: Optional[str] = "INFO") -> None:
         """
         Configura el sistema de logging básico.
@@ -47,7 +62,8 @@ class PSMLogger:
         if not logs_dir.exists():
             logs_dir.mkdir(parents=True, exist_ok=True)
 
-        log_file: Path = logs_dir / "tusremesasya.log"
+        log_file: Path = logs_dir / "monitor.log"
+        selected_level_str = (level or "INFO").upper()
 
         # Definimos el formato base
         log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
@@ -77,7 +93,7 @@ class PSMLogger:
 
         # Configuramos el logger root
         root_logger = logging.getLogger()
-        root_logger.setLevel(PSMLogger.LEVEL_MAP.get(str(level), logging.INFO))
+        root_logger.setLevel(PSMLogger.LEVEL_MAP.get(selected_level_str, logging.INFO))
 
         # Limpiamos handlers existentes para evitar duplicados
         root_logger.handlers.clear()
@@ -85,3 +101,5 @@ class PSMLogger:
         # Agregamos handlers personalizados
         root_logger.addHandler(rotate_handler)
         root_logger.addHandler(stream_handler)
+
+        PSMLogger._configure_third_party_loggers(selected_level_str)
