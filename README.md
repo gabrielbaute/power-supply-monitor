@@ -1,5 +1,5 @@
 # Power Supply Monitor (PSM)
-Version: 0.3.0
+Version: 0.4.0
 
 Servicio ligero en Python diseñado para monitorear el estado de la fuente de alimentación eléctrica (AC) en servidores alojados en laptops (Ubuntu/Linux) y enviar alertas en tiempo real mediante **ntfy**.
 
