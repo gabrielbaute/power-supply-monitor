@@ -47,6 +47,8 @@ class PowerMonitorManager:
         )
         self.electric_event_service = ElectricEventService(database_session=database_session)
         self.is_ac_connected: bool = self.power_monitor_service.read_ac_status()
+        self._pending_status: Optional[bool] = None
+        self._pending_count: int = 0
 
     def _build_event_register(self, ) -> ElectricEventCreate:
         """
@@ -109,6 +111,30 @@ class PowerMonitorManager:
         )
         self.logger.info(f"Publicando alertas en: {self.settings.NTFY_URL}")
 
+        # --- Reconciliación post-reinicio ---
+        # Si hay energía pero quedó un evento abierto en la DB, el servidor
+        # se apagó durante el corte y volvió con la electricidad ya restablecida.
+        if self.is_ac_connected:
+            closed_event = await self.electric_event_service.close_last_open_event()
+            if closed_event:
+                duration = closed_event.end_timestamp - closed_event.start_timestamp  # type: ignore
+                self.logger.info(
+                    f"Evento {closed_event.id} cerrado tras reinicio. Duración estimada: {duration}."
+                )
+                ntfy_payload = self._build_ntfy_message(
+                    title="RESTABLECIDO: ENERGIA AC",
+                    event="SUMINISTRO RESTITUIDO",
+                    description=(
+                        f"El servidor se reinició tras un corte de energía. "
+                        f"Duración estimada: {duration}. El suministro está activo."
+                    ),
+                    priority=NTFYPriority.DEFAULT,
+                    tags="heavy_check_mark,electric_plug",
+                )
+                await self.ntfy_service.emit(payload=ntfy_payload)
+                await self.ntfy_service.close()
+
+        # --- Bucle principal con debounce ---
         while True:
             try:
                 current_ac_status: bool = (
@@ -116,43 +142,66 @@ class PowerMonitorManager:
                 )
 
                 if current_ac_status != self.is_ac_connected:
-                    self.is_ac_connected = current_ac_status
+                    # Estado inestable: iniciamos o continuamos el conteo de confirmación.
+                    if self._pending_status != current_ac_status:
+                        self._pending_status = current_ac_status
+                        self._pending_count = 0
 
-                    if not self.is_ac_connected:
-                        self.logger.info("Energía desconectada, enviando notificación.")
-                        ntfy_payload = self._build_ntfy_message(
-                            title="ALERTA: CORTE DE ENERGIA",
-                            event="SUMINISTRO DESCONECTADO",
-                            description="El servidor ha perdido la alimentación de red y está operando con BATERÍA.",
-                            priority=NTFYPriority.MAX,
-                            tags="warning,zap",
-                        )
-                        event_register = self._build_event_register()
-                        await self.electric_event_service.register_event(event_data=event_register)
-                        await self.ntfy_service.emit(payload=ntfy_payload)
-                        await self.ntfy_service.close()
-                    else:
-                        self.logger.info("Energía restituida, enviando notificación.")
-                        closed_event = await self.electric_event_service.close_last_open_event()
-                        duration: Any = ""
-                        if closed_event:
-                            duration = closed_event.end_timestamp - closed_event.start_timestamp # type: ignore
-                            self.logger.info(
-                                f"Evento {closed_event.id} cerrado. Duración: {duration}."
+                    self._pending_count += 1
+                    self.logger.debug(
+                        f"Estado inestable: AC={'conectado' if current_ac_status else 'desconectado'} "
+                        f"({self._pending_count}/{self.settings.CONFIRMATION_READS})"
+                    )
+
+                    if self._pending_count >= self.settings.CONFIRMATION_READS:
+                        # Cambio de estado confirmado.
+                        self.is_ac_connected = current_ac_status
+                        self._pending_status = None
+                        self._pending_count = 0
+
+                        if not self.is_ac_connected:
+                            self.logger.info("Energía desconectada, enviando notificación.")
+                            ntfy_payload = self._build_ntfy_message(
+                                title="ALERTA: CORTE DE ENERGIA",
+                                event="SUMINISTRO DESCONECTADO",
+                                description="El servidor ha perdido la alimentación de red y está operando con BATERÍA.",
+                                priority=NTFYPriority.MAX,
+                                tags="warning,zap",
                             )
+                            event_register = self._build_event_register()
+                            await self.electric_event_service.register_event(event_data=event_register)
+                            await self.ntfy_service.emit(payload=ntfy_payload)
+                            await self.ntfy_service.close()
+                        else:
+                            self.logger.info("Energía restituida, enviando notificación.")
+                            closed_event = await self.electric_event_service.close_last_open_event()
+                            duration: Any = ""
+                            if closed_event:
+                                duration = closed_event.end_timestamp - closed_event.start_timestamp  # type: ignore
+                                self.logger.info(
+                                    f"Evento {closed_event.id} cerrado. Duración: {duration}."
+                                )
 
-                        ntfy_payload = self._build_ntfy_message(
-                            title="RESTABLECIDO: ENERGIA AC",
-                            event="SUMINISTRO RESTITUIDO",
-                            description=(
-                                f"El suministro eléctrico se ha restaurado tras {duration}. "
-                                "El servidor vuelve a cargar la batería."
-                            ) if closed_event else "El suministro eléctrico se ha restaurado.",
-                            priority=NTFYPriority.DEFAULT,
-                            tags="heavy_check_mark,electric_plug",
-                        )
-                        await self.ntfy_service.emit(payload=ntfy_payload)
-                        await self.ntfy_service.close()
+                            ntfy_payload = self._build_ntfy_message(
+                                title="RESTABLECIDO: ENERGIA AC",
+                                event="SUMINISTRO RESTITUIDO",
+                                description=(
+                                    f"El suministro eléctrico se ha restaurado tras {duration}. "
+                                    "El servidor vuelve a cargar la batería."
+                                ) if closed_event else "El suministro eléctrico se ha restaurado.",
+                                priority=NTFYPriority.DEFAULT,
+                                tags="heavy_check_mark,electric_plug",
+                            )
+                            await self.ntfy_service.emit(payload=ntfy_payload)
+                            await self.ntfy_service.close()
+
+                elif self._pending_status is not None:
+                    # El estado volvió a la normalidad antes de confirmarse: falso contacto.
+                    self.logger.debug(
+                        f"Falso contacto descartado tras {self._pending_count} lectura(s)."
+                    )
+                    self._pending_status = None
+                    self._pending_count = 0
 
             except Exception as loop_error:
                 self.logger.error(f"[Error en loop]: {loop_error}")
