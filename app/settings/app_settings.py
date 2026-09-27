@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_PRE_PING: bool = True
 
+    # ----------- API ------------
+    API_HOST: str = "127.0.0.1"
+    API_PORT: int = 8095
+    API_RELOAD: bool = False
+    API_LOG_LEVEL: str = "info"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
