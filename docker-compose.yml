@@ -2,6 +2,8 @@ services:
   power-monitor:
     build: .
     container_name: power_supply_monitor
+    ports:
+      - "8095:8095"
     restart: always
     environment:
       - NTFY_URL=https://ntfy.sh

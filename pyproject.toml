@@ -6,13 +6,18 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "aiosqlite>=0.22.1",
+    "fastapi>=0.141.1",
     "httpx>=0.28.1",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "sqlmodel>=0.0.42",
+    "uvicorn>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
     "bumpver>=2026.1132",
 ]
+
+[tool.ruff.lint]
+ignore = ["B008"]

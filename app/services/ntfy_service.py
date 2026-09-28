@@ -1,6 +1,6 @@
-import httpx
 import logging
 from typing import Dict, Optional
+from httpx import AsyncClient, HTTPError
 
 from app.schemas import NTFYPayload
 from app.settings import Settings
@@ -8,7 +8,7 @@ from app.settings import Settings
 class NtfysService:
     """Servicio para emitir notificaciones asíncronas a través de NTFY."""
 
-    def __init__(self, settings: Settings, client: Optional[httpx.AsyncClient] = None) -> None:
+    def __init__(self, settings: Settings, client: Optional[AsyncClient] = None) -> None:
         """
         Inicializa el servicio NTFY con la configuración y un cliente HTTP asíncrono.
 
@@ -23,15 +23,15 @@ class NtfysService:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._client = client
 
-    async def _get_client(self) -> httpx.AsyncClient:
+    async def _get_client(self) -> AsyncClient:
         """
         Obtiene o crea un cliente HTTPX asíncrono.
 
         Returns:
-            httpx.AsyncClient: Cliente de red asíncrono.
+            AsyncClient: Cliente de red asíncrono.
         """
         if self._client is None or self._client.is_closed:
-            self._client = httpx.AsyncClient(timeout=10.0)
+            self._client = AsyncClient(timeout=10.0)
         return self._client
 
     def _format_message(self, payload: NTFYPayload) -> str:
@@ -48,7 +48,7 @@ class NtfysService:
         footer = f"— *{self.app_name}* `v{self.app_version}`"
         body_parts.append(footer)
 
-        return "\n\n".join(body_parts)
+        return "\n\n".join(body_parts) #type: ignore
 
     def _format_headers(self, payload: NTFYPayload) -> Dict[str, str]:
         """
@@ -107,7 +107,7 @@ class NtfysService:
                 f"Notificación NTFY enviada exitosamente. Status code: {response.status_code}"
             )
             return response.status_code
-        except httpx.HTTPError as e:
+        except HTTPError as e:
             self.logger.error(f"Error al enviar notificación NTFY: {e}")
             return None
 

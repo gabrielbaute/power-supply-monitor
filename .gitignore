@@ -23,6 +23,9 @@ repomix-output.xml
 # Variables de entorno
 *.env
 
+# Test files
+power_supply
+
 # Logs
 logs/
 *.log
