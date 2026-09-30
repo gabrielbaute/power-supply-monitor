@@ -173,7 +173,7 @@ class PowerMonitorManager:
         if (
             self._last_fluctuation_notification is not None
             and (now - self._last_fluctuation_notification).total_seconds()
-                < FLUCTUATION_NOTIFY_COOLDOWN_SECONDS
+                < self.settings.FLUCTUATION_NOTIFY_COOLDOWN_SECONDS
         ):
             self.logger.debug("Notificación de fluctuación suprimida por cooldown.")
             return
