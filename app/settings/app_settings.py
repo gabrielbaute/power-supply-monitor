@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     CHECK_INTERVAL: int = 5
     SUPPLY_PATH: Path = Path("/sys/class/power_supply")
     AC_SUPPLY_NAME: str = "AC0"
+    FLUCTUATION_NOTIFY_COOLDOWN_SECONDS: int = 600  # 10 minutos
 
     # ----------- SERVER LOCATION ------------
     LATITUDE: float

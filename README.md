@@ -37,6 +37,7 @@ El servicio se configura mediante variables de entorno que pueden definirse en u
 | `AC_SUPPLY_NAME` | Nombre del dispositivo AC en `/sys/class/power_supply/`. | `AC0` | `AC`, `AC0`, `ADP1` |
 | `SUPPLY_PATH` | Ruta base del sistema de archivos `sysfs` para energía. | `/sys/class/power_supply` | `/sys/class/power_supply` |
 | `CHECK_INTERVAL` | Intervalo en segundos entre cada comprobación de estado. | `5` | `10` |
+| `FLUCTUATION_NOTIFY_COOLDOWN_SECONDS` | Cooldown anti-spam para casos de fluctuación eléctrica. | `600` | `600` |
 | `LOG_LEVEL` | Nivel de registro de logs (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` | `DEBUG` |
 | `LATITUDE` | Latitud de ubicación del servidor. | `0.0` | `0.0` |
 | `LONGITUDE` |  Longitud de ubicación del servidor. | `0.0` | `0.0` |
@@ -56,9 +57,13 @@ services:
     environment:
       - NTFY_URL=https://ntfy.sh
       - NTFY_TOPIC=tu_topic_privado
+      - SUPPLY_PATH=/sys/class/power_supply
       - AC_SUPPLY_NAME=AC0
       - CHECK_INTERVAL=5
+      - FLUCTUATION_NOTIFY_COOLDOWN_SECONDS=600
       - LOG_LEVEL=INFO
+      - LATITUDE=0.0
+      - LONGITUDE=0.0
     volumes:
       - /sys/class/power_supply:/sys/class/power_supply:ro
       - ./logs:/app/logs
