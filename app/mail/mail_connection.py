@@ -62,11 +62,11 @@ class SMTPClient:
                     self.settings.MAIL_PASSWORD
                 )
         except SMTPException as e:
-            self.logger.error(f"Error al conectar al servidor SMTP: {e}")
+            self.logger.exception("Error al conectar al servidor SMTP.")
             raise SMTPConnectionError(
                 message=f"Error al conectarse al servidor SMTP {self.settings.MAIL_HOST}",
-                details={"Detalle de error:": {e}}
-            )
+                details={"detail": str(e)}
+            ) from e
 
     def send_mail(self, message) -> None:
         """
@@ -90,11 +90,11 @@ class SMTPClient:
             self.logger.debug(f"Enviando correo a {message['To']}")
             self.server.send_message(message)
         except SMTPException as e:
-            self.logger.error(f"Error al enviar el correo: {e}")
+            self.logger.exception("Error al enviar el correo.")
             raise SendMailError(
                 message="Error al enviar el correo",
-                details={"Detalle de error:": {e}}
-            )
+                details={"detail": str(e)}
+            ) from e
 
     def disconnect(self) -> None:
         """
