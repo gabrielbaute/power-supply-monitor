@@ -18,6 +18,3 @@ dependencies = [
 dev = [
     "bumpver>=2026.1132",
 ]
-
-[tool.ruff.lint]
-ignore = ["B008"]

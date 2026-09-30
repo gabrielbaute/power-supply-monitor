@@ -192,7 +192,7 @@ class ElectricEventController(
             raise DatabaseOperationError(
                 message=f"Error al actualizar el registro de evento {event_id}.",
                 details={"detail": e}
-            )
+            ) from e
 
     async def delete_event(self, event_id: UUID) -> Optional[ElectricEventResponse]:
         """

@@ -94,7 +94,7 @@ class DatabaseManager:
             self.logger.error(f"Error inicializando la base de datos: {e}")
             raise
 
-    async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(self) -> AsyncGenerator[AsyncSession]:
         """
         Provee una sesión asíncrona de la base de datos para operaciones CRUD.
 
