@@ -41,7 +41,7 @@ El servicio se configura mediante variables de entorno que pueden definirse en u
 | `LOG_LEVEL` | Nivel de registro de logs (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` | `DEBUG` |
 | `LATITUDE` | Latitud de ubicación del servidor. | `0.0` | `0.0` |
 | `LONGITUDE` |  Longitud de ubicación del servidor. | `0.0` | `0.0` |
-| `API_HOST` |  Dirección HOST de la API. | `127.0.0.1` | `127.0.0.1` |
+| `API_HOST` |  Dirección HOST de la API. | `0.0.0.0` | `0.0.0.0` |
 | `API_PORT` |  Puerto de escucha de la API. | `8095` | `8095` |
 
 ---

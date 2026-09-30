@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     DATABASE_POOL_PRE_PING: bool = True
 
     # ----------- API ------------
-    API_HOST: str = "127.0.0.1"
+    API_HOST: str = "0.0.0.0"
     API_PORT: int = 8095
     API_RELOAD: bool = False
     API_LOG_LEVEL: str = "info"
