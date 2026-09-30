@@ -11,6 +11,7 @@ services:
       - SUPPLY_PATH=/sys/class/power_supply
       - AC_SUPPLY_NAME=AC0
       - CHECK_INTERVAL=5
+      - FLUCTUATION_NOTIFY_COOLDOWN_SECONDS=600
       - LOG_LEVEL=INFO
       - LATITUDE=0.0
       - LONGITUDE=0.0
