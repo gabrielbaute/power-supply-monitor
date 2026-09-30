@@ -203,7 +203,7 @@ class PowerMonitorManager:
                     self._pending_status = None
                     self._pending_count = 0
 
-            except Exception as loop_error:
-                self.logger.error(f"[Error en loop]: {loop_error}")
+            except Exception:
+                self.logger.exception("[Error en loop]")
 
             await asyncio.sleep(self.settings.CHECK_INTERVAL)
