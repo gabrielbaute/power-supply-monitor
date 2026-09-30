@@ -152,7 +152,7 @@ class AsyncBaseController(Generic[ModelType, CreateSchemaType, UpdateSchemaType,
             raise DatabaseOperationError(
                 message="Error al realizar la consulta con condiciones en la base de datos.",
                 details={"error": str(e)}
-            )
+            ) from e
 
     async def get_multi(
         self,
