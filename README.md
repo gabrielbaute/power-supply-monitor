@@ -38,6 +38,7 @@ El servicio se configura mediante variables de entorno que pueden definirse en u
 | `SUPPLY_PATH` | Ruta base del sistema de archivos `sysfs` para energía. | `/sys/class/power_supply` | `/sys/class/power_supply` |
 | `CHECK_INTERVAL` | Intervalo en segundos entre cada comprobación de estado. | `5` | `10` |
 | `FLUCTUATION_NOTIFY_COOLDOWN_SECONDS` | Cooldown anti-spam para casos de fluctuación eléctrica. | `600` | `600` |
+| `CONFIRMATION_READS` | Lecturas consecutivas para confirmar un cambio de estado (BOUNCE). | `3` | `3` |
 | `LOG_LEVEL` | Nivel de registro de logs (`DEBUG`, `INFO`, `WARNING`, `ERROR`). | `INFO` | `DEBUG` |
 | `LATITUDE` | Latitud de ubicación del servidor. | `0.0` | `0.0` |
 | `LONGITUDE` |  Longitud de ubicación del servidor. | `0.0` | `0.0` |
@@ -61,10 +62,12 @@ services:
       - AC_SUPPLY_NAME=AC0
       - CHECK_INTERVAL=5
       - FLUCTUATION_NOTIFY_COOLDOWN_SECONDS=600
+      - CONFIRMATION_READS=3
       - LOG_LEVEL=INFO
       - LATITUDE=0.0
       - LONGITUDE=0.0
     volumes:
       - /sys/class/power_supply:/sys/class/power_supply:ro
       - ./logs:/app/logs
+      - ./instance:/app/instance
 ```
