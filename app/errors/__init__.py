@@ -4,3 +4,9 @@ from app.errors.database_errors import (
     DatabaseSessionError,
     RegisterNotFoundError
 )
+from app.errors.mail_errors import (
+    SMTPConnectionError,
+    SendMailError,
+    TemplateMailNotFound,
+    BuildMessageError
+)

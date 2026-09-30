@@ -1,0 +1,32 @@
+<!-- Plantilla para reporte de fallo o evento eléctrico -->
+{% set mail_title = "Alerta: Evento Eléctrico Detectado" %}
+{% set header_title = "Fallo Eléctrico Registrado" %}
+{% set header_subtitle = "Se ha detectado una anomalía en el suministro principal" %}
+{% set header_class = "bg-danger" %}
+
+{% include 'partials/_head.html' %}
+{% include 'partials/_header.html' %}
+
+<div class="content">
+    <p>Hola,</p>
+    <p>El sistema ha registrado un nuevo evento en la red de alimentación eléctrica:</p>
+
+    <table class="data-table">
+        <tr>
+            <th>Tipo de Evento</th>
+            <td><span class="badge bg-danger">{{ event_type }}</span></td>
+        </tr>
+        <tr>
+            <th>Fecha / Hora de Inicio</th>
+            <td>{{ start_timestamp }}</td>
+        </tr>
+        <tr>
+            <th>Ubicación (Lat, Long)</th>
+            <td>{{ latitude }}, {{ longitude }}</td>
+        </tr>
+    </table>
+
+    <p>El monitor mantendrá el seguimiento del estado de la energía hasta la restitución del servicio.</p>
+</div>
+
+{% include 'partials/_footer.html' %}

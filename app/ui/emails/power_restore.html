@@ -1,0 +1,32 @@
+<!-- Plantilla para reporte de restablecimiento de servicio -->
+{% set mail_title = "Notificación: Servicio Eléctrico Restablecido" %}
+{% set header_title = "Energía Restablecida" %}
+{% set header_subtitle = "El suministro eléctrico ha vuelto a la normalidad" %}
+{% set header_class = "bg-success" %}
+
+{% include 'partials/_head.html' %}
+{% include 'partials/_header.html' %}
+
+<div class="content">
+    <p>Hola,</p>
+    <p>Te informamos que el servicio de energía eléctrica se ha restablecido correctamente.</p>
+
+    <table class="data-table">
+        <tr>
+            <th>Inicio de la Incidencia</th>
+            <td>{{ start_timestamp }}</td>
+        </tr>
+        <tr>
+            <th>Restablecimiento</th>
+            <td>{{ end_timestamp }}</td>
+        </tr>
+        <tr>
+            <th>Duración Total</th>
+            <td><strong>{{ duration }}</strong></td>
+        </tr>
+    </table>
+
+    <p>Todos los sistemas operan normalmente con alimentación AC de red.</p>
+</div>
+
+{% include 'partials/_footer.html' %}

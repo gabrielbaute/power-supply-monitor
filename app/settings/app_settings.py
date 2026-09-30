@@ -18,8 +18,10 @@ class Settings(BaseSettings):
     # ------------ Directories and config path ------------
     # Directory and path config
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
+    UI_DIR: Path = Path(__file__).resolve().parent.parent / "ui"
     INSTANCE_DIR: Path = BASE_DIR / "instance"
     LOGS_DIR: Path = BASE_DIR / "logs"
+    MAIL_TEMPLATES_DIR: Path = UI_DIR / "emails"
 
     # ----------- LOGGING -------------
     LOG_LEVEL: str = "INFO"
@@ -53,6 +55,14 @@ class Settings(BaseSettings):
     API_PORT: int = 8095
     API_RELOAD: bool = False
     API_LOG_LEVEL: str = "info"
+
+    # ------------ Mail ------------
+    MAIL_HOST: str = "smtp.google.com"
+    MAIL_PORT: int = 587
+    MAIL_USERNAME: str = "yourmail@gmail.com"
+    MAIL_PASSWORD: str = "your-email-password"
+    MAIL_USE_TLS: bool = True
+    MAIL_USE_SSL: bool = False
 
     model_config = SettingsConfigDict(
         env_file=".env",
