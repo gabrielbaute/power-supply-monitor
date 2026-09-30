@@ -54,6 +54,14 @@ class Settings(BaseSettings):
     API_RELOAD: bool = False
     API_LOG_LEVEL: str = "info"
 
+    # ------------ Mail ------------
+    MAIL_HOST: str = "smtp.google.com"
+    MAIL_PORT: int = 587
+    MAIL_USERNAME: str = "yourmail@gmail.com"
+    MAIL_PASSWORD: str = "your-email-password"
+    MAIL_USE_TLS: bool = True
+    MAIL_USE_SSL: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
