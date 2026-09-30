@@ -18,8 +18,10 @@ class Settings(BaseSettings):
     # ------------ Directories and config path ------------
     # Directory and path config
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
+    UI_DIR: Path = Path(__file__).resolve().parent.parent / "ui"
     INSTANCE_DIR: Path = BASE_DIR / "instance"
     LOGS_DIR: Path = BASE_DIR / "logs"
+    MAIL_TEMPLATES_DIR: Path = UI_DIR / "emails"
 
     # ----------- LOGGING -------------
     LOG_LEVEL: str = "INFO"
