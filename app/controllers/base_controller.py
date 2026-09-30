@@ -3,18 +3,19 @@ Controller base abstracto para operaciones CRUD asíncronas con SQLAlchemy y SQL
 Este módulo define la clase `AsyncBaseController`, que proporciona una implementación básica para interactuar con la base de datos, incluyendo métodos para crear, leer, actualizar y eliminar registros. La clase está diseñada para ser genérica y puede ser extendida para modelos específicos.
 """
 from uuid import UUID
+from pydantic import BaseModel
 from sqlmodel import select, SQLModel, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Generic, Type, TypeVar, List, Optional, Any, Tuple, Union
-
-ModelType = TypeVar("ModelType", bound=SQLModel)
-CreateSchemaType = TypeVar("CreateSchemaType")
-UpdateSchemaType = TypeVar("UpdateSchemaType")
-ResponseSchemaType = TypeVar("ResponseSchemaType")
+from typing import Type, List, Optional, Any, Tuple, Union
 
 from app.errors.database_errors import DatabaseOperationError
 
-class AsyncBaseController(Generic[ModelType, CreateSchemaType, UpdateSchemaType, ResponseSchemaType]):
+class AsyncBaseController[
+    ModelType: SQLModel,
+    CreateSchemaType: BaseModel,
+    UpdateSchemaType: BaseModel,
+    ResponseSchemaType: BaseModel,
+]:
     """
     Controlador base para operaciones CRUD asíncronas con SQLAlchemy y SQLModel.
     Esta clase proporciona métodos genéricos para interactuar con la base de datos, incluyendo la creación, lectura, actualización y eliminación de registros. Está diseñada para ser extendida por controladores específicos de modelos.
@@ -191,7 +192,7 @@ class AsyncBaseController(Generic[ModelType, CreateSchemaType, UpdateSchemaType,
         Returns:
             ModelType: El objeto recién creado en la base de datos.
         """
-        obj_data = obj_in.model_dump() # type: ignore
+        obj_data = obj_in.model_dump()
         db_obj = self.model(**obj_data)
 
         self.database_session.add(db_obj)
@@ -214,7 +215,7 @@ class AsyncBaseController(Generic[ModelType, CreateSchemaType, UpdateSchemaType,
         Returns:
             ModelType: El objeto actualizado en la base de datos.
         """
-        update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True) # type: ignore
+        update_data = obj_in if isinstance(obj_in, dict) else obj_in.model_dump(exclude_unset=True)
 
         for field in update_data:
             if hasattr(db_obj, field):
