@@ -73,6 +73,7 @@ class Settings(BaseSettings):
             self.INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
         except OSError as e:
             print(f" CRITICAL ERROR: Could not create directory {dir}. check permissions.")
+            print(f"Errors Detail: {e}")
             sys.exit(1)
 
 settings = Settings()
