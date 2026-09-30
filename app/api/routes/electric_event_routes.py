@@ -11,7 +11,7 @@ router = APIRouter(prefix="/events", tags=["Electric Events"])
 
 @router.get("/detail", response_model=ElectricEventResponse)
 async def get_event_detail(
-    event_id: UUID = Query(None, description="ID del evento eléctrico"),
+    event_id: UUID = Query(description="ID del evento eléctrico"),
     electric_event_service: ElectricEventService = Depends(get_electric_event_service)
 ) -> Optional[ElectricEventResponse]:
     """
@@ -21,8 +21,8 @@ async def get_event_detail(
 
 @router.get("/history", response_model=ElectricEventListResponse)
 async def get_events_history(
-    start_date: datetime = Query(None, description="Fecha de inicio (YYYY-MM-DDTHH:MM:SS)."),
-    end_date: datetime = Query(None, description="Fecha de fin de la búsqueda (YYYY-MM-DDTHH:MM:SS)."),
+    start_date: datetime = Query(description="Fecha de inicio (YYYY-MM-DDTHH:MM:SS)."),
+    end_date: datetime = Query(description="Fecha de fin de la búsqueda (YYYY-MM-DDTHH:MM:SS)."),
     skip: int = Query(0, ge=0, description="Registros a saltar en la paginación."),
     limit: int = Query(100, ge=1, le=1000, description="Máximo de registros a traer por petición."),
     electric_event_service: ElectricEventService = Depends(get_electric_event_service)

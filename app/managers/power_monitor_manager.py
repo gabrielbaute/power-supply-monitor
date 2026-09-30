@@ -1,15 +1,14 @@
 import asyncio
 import logging
-from uuid import uuid4
 from pydantic import HttpUrl
 from httpx import AsyncClient
 from typing import Any, Dict, Optional
-from datetime import datetime, UTC, timedelta
+from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.settings import Settings
 from app.enums import NTFYPriority, EventType
-from app.schemas import NTFYPayload, ElectricEventCreate, ElectricEventResponse
+from app.schemas import NTFYPayload, ElectricEventCreate
 from app.services import ElectricEventService, NtfysService, PowerMonitorService
 
 class PowerMonitorManager:

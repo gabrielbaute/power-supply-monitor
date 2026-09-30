@@ -31,7 +31,7 @@ def create_app(settings: Settings) -> FastAPI:
         allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
-        allow_credentials=True,
+        allow_credentials=False,
     )
 
     include_routers(app, prefix="/api/v1")

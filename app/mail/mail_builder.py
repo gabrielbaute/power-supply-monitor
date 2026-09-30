@@ -41,7 +41,7 @@ class MailBuilder:
             self.logger.error(f"Plantilla de email {template_name} no encontrada.")
             raise TemplateMailNotFound(
                 message=f"Error al cargar la plantilla {template_name}.",
-                details={"Detalle de error:": {e}}
+                details={"detail": str(e)}
             ) from e
 
     def create_message(
@@ -81,5 +81,5 @@ class MailBuilder:
             self.logger.error(f"Error al construir el mensaje: {e}")
             raise BuildMessageError(
                 message=f"Error al construir el mensaje de correo para {recipient}",
-                details={"Detalle de error:": {e}}
+                details={"detail": str(e)}
             ) from e

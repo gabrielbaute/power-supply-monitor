@@ -42,6 +42,7 @@ async def main() -> None:
     try:
         await server.serve()
     finally:
+        print("API detenida, deteniendo monitor.")
         monitor_task.cancel()
         try:
             await monitor_task

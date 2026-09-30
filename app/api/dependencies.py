@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.settings import Settings, settings
 from app.managers import DatabaseManager, db_manager
-from app.services import ElectricEventService
+from app.services import ElectricEventService, LogService
 
 def get_settings_instance() -> Settings:
     """
@@ -37,3 +37,17 @@ def get_electric_event_service(
     Inyecta una instancia de ElectricEventService en la API
     """
     return ElectricEventService(database_session=database_session)
+
+def get_log_service(
+    settings_instance: Settings = Depends(get_settings_instance)
+) -> LogService:
+    """
+    Inyecta una instancia del servicio LogService en la API.
+
+    Args:
+        settings_instance (Settings): Instancia global de configuración.
+
+    Returns:
+        LogService: Servicio de gestión e inspección de logs.
+    """
+    return LogService(settings=settings_instance)

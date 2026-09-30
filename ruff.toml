@@ -1,7 +1,5 @@
 line-length = 120
 
 [lint]
-ignore = [
-    "B008",
-    "UP008"
-]
+select = ["E", "W", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["B008", "UP008"]
