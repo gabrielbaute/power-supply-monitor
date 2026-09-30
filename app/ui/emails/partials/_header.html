@@ -1,0 +1,10 @@
+<!-- Cuerpo base y caja visual superior -->
+<body>
+    <div class="email-container">
+        <!-- Banner personalizable mediante header_class -->
+        <div class="header-box {{ header_class | default('bg-default') }}">
+            <h1>{{ header_title | default('Power Supply Monitor') }}</h1>
+            {% if header_subtitle %}
+                <p>{{ header_subtitle }}</p>
+            {% endif %}
+        </div>
