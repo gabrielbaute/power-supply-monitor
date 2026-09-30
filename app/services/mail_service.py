@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Dict, Any
 
@@ -27,14 +28,20 @@ class MailService:
         self.settings = settings
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def send_templated_email(
+    def _send_sync(self, message: Any) -> None:
+        """Método privado síncrono para manejar la conexión SMTP."""
+        with self.client as active_client:
+            active_client.send_mail(message)
+
+    async def send_templated_email(
             self,
             recipient: str,
             subject: str,
             template: str,
             context: Dict[str, Any]
         ) -> None:
-        """Renderiza una plantilla y la envía.
+        """
+        Renderiza una plantilla y la envía.
 
         Args:
             recipient (str): Email destino.
@@ -42,7 +49,6 @@ class MailService:
             template (str): Nombre del archivo .html en /templates.
             context (Dict[str, Any]): Variables para la plantilla.
         """
-        # 1. Construir el mensaje
         message = self.builder.create_message(
             sender=self.settings.MAIL_USERNAME,
             recipient=recipient,
@@ -50,7 +56,5 @@ class MailService:
             template_name=template,
             context=context
         )
-        self.logger.info(f"Sending email to {recipient}. Subject: {subject}.")
-        # 2. Enviar usando el context manager del cliente
-        with self.client as active_client:
-            active_client.send_mail(message)
+        self.logger.info(f"Enviando email a {recipient}. Asunto: {subject}")
+        await asyncio.to_thread(self._send_sync, message)
