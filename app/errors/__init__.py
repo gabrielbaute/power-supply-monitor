@@ -11,3 +11,8 @@ from app.errors.mail_errors import (
     TemplateMailNotFound,
     BuildMessageError
 )
+from app.errors.user_errors import (
+    ResourceNotFoundError,
+    ValidationError,
+    PermissionDeniedError
+)
