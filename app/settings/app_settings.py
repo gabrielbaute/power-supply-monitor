@@ -51,6 +51,11 @@ class Settings(BaseSettings):
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_PRE_PING: bool = True
 
+    # ----------- USER_CREDENTIALS ------------
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin"
+    ADMIN_EMAIL: str = "mail@admin.com"
+
     # ----------- API ------------
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8095
