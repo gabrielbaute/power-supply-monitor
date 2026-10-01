@@ -82,7 +82,7 @@ def get_mail_service(
     """
     return MailService(settings=settings_instance)
 
-def get_user_iservice(
+def get_user_service(
     database_session: AsyncSession = Depends(get_db_session),
     mail_service: MailService = Depends(get_mail_service),
     settings_instance: Settings = Depends(get_settings_instance),
@@ -105,7 +105,7 @@ def get_user_iservice(
 async def get_current_user(
     token_header: Optional[str] = Depends(oauth2_scheme),
     token_query: Optional[str] = Query(None, alias="token"),
-    user_service: UserService = Depends(get_user_iservice)
+    user_service: UserService = Depends(get_user_service)
 ) -> Optional[UserResponse]:
     """
     Valida el token JWT (extraído de Header o Query Param) y retorna el usuario actual.
