@@ -236,7 +236,7 @@ class UserController(
 
         return True
 
-    async def delete_user(self, user_id: UUID) -> Optional[UserResponse]:
+    async def delete_user(self, user_id: UUID) -> UserResponse:
         """
         Elimina el registro de un usuario de la base de datos.
 
