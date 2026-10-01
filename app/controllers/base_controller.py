@@ -1,6 +1,9 @@
 """
 Controller base abstracto para operaciones CRUD asíncronas con SQLAlchemy y SQLModel.
-Este módulo define la clase `AsyncBaseController`, que proporciona una implementación básica para interactuar con la base de datos, incluyendo métodos para crear, leer, actualizar y eliminar registros. La clase está diseñada para ser genérica y puede ser extendida para modelos específicos.
+Este módulo define la clase `AsyncBaseController`, que proporciona una implementación
+básica para interactuar con la base de datos, incluyendo métodos para crear, leer,
+actualizar y eliminar registros. La clase está diseñada para ser genérica
+y puede ser extendida para modelos específicos.
 """
 from uuid import UUID
 from pydantic import BaseModel
@@ -8,7 +11,7 @@ from sqlmodel import select, SQLModel, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Type, List, Optional, Any, Tuple, Union
 
-from app.errors.database_errors import DatabaseOperationError
+from app.errors.database_errors import DatabaseOperationError, RegisterNotFoundError
 
 class AsyncBaseController[
     ModelType: SQLModel,
@@ -18,7 +21,8 @@ class AsyncBaseController[
 ]:
     """
     Controlador base para operaciones CRUD asíncronas con SQLAlchemy y SQLModel.
-    Esta clase proporciona métodos genéricos para interactuar con la base de datos, incluyendo la creación, lectura, actualización y eliminación de registros. Está diseñada para ser extendida por controladores específicos de modelos.
+    Esta clase proporciona métodos genéricos para interactuar con la base de datos, incluyendo la creación, lectura,
+    actualización y eliminación de registros. Está diseñada para ser extendida por controladores específicos de modelos.
 
     Attributes:
         model (Type[ModelType]): El modelo SQLModel asociado con este controlador.
@@ -61,16 +65,61 @@ class AsyncBaseController[
 
     async def _commit_or_rollback(self) -> None:
         """
-        Intenta realizar un commit de la sesión actual. Si ocurre un error, realiza un rollback para revertir los cambios.
+        Intenta realizar un commit de la sesión actual. Si falla, realiza un rollback para revertir los cambios.
 
         Raises:
-            Exception: Si ocurre un error durante el commit, se lanza una excepción con el error correspondiente y se realiza un rollback de la sesión.
+            Exception: Si ocurre un error durante el commit, se lanza una excepción con el error correspondiente
+            y se realiza un rollback de la sesión.
         """
         try:
             await self.database_session.commit()
         except Exception:
             await self.database_session.rollback()
             raise
+
+    async def _update_or_rollback(self, db_obj: ModelType) -> bool:
+        """
+        Intenta realizar un commit con el objetivo explícito de actualizar un objeto de la base de datos.
+
+        Args:
+            db_obj (ModelType): El objeto actual en la base de datos.
+
+        Returns:
+            bool: True si la edición del campo fue exitosa.
+
+        Raises:
+            Exception: Si ocurre un error durante el commit, se lanza una excepción con el error correspondiente
+            y se realiza un rollback de la sesión.
+        """
+        try:
+            self.database_session.add(db_obj)
+            await self.database_session.commit()
+            return True
+        except Exception:
+            await self.database_session.rollback()
+            raise
+
+    async def _get_or_raise(self, db_obj_id: UUID) -> ModelType:
+        """
+        Obtiene un registro del ModelType específico o genere una excepción.
+
+        Args:
+            db_obj_id (UUID): Identificador de clave primaria de la base de datos.
+
+        Returns:
+            ModelType: El modelo de datos de persistencia de evento.
+
+        Raises:
+            RegisterNotFoundError: Si el ID no se corresponde con ningún registro.
+        """
+        event_id = self._validate_uuid(db_obj_id)
+        obj = await self.get(id=db_obj_id)
+        if obj is None:
+            raise RegisterNotFoundError(
+                message="Registro de evento no encontrado en la base de datos.",
+                details={"detail": f"ID del objeto de evento: {event_id}",}
+            )
+        return obj
 
     async def get(self, id: UUID) -> Optional[ModelType]:
         """
@@ -92,14 +141,17 @@ class AsyncBaseController[
         sort_by_attribute: str = "date"
     ) -> Optional[ModelType]:
         """
-        Devuelve el último registro que cumple con las condiciones dadas, ordenado por un atributo específico en orden descendente.
+        Devuelve el último registro que cumple con las condiciones dadas,
+        ordenado por un atributo específico en orden descendente.
 
         Args:
             where_clause (List[Any]): Lista de expresiones condicionales de SQLAlchemy para filtrar los registros.
-            sort_by_attribute (str): Nombre del atributo por el cual ordenar los registros en orden descendente. Por defecto es "date".
+            sort_by_attribute (str): Nombre del atributo por el cual ordenar los registros en orden descendente.
+            Por defecto es "date".
 
         Returns:
-            Optional[ModelType]: El objeto encontrado o None si no existe ningún registro que cumpla con las condiciones.
+            Optional[ModelType]: El objeto encontrado o None si no existe
+            ningún registro que cumpla con las condiciones.
         """
         order_column = getattr(self.model, sort_by_attribute)
         statement = select(self.model).where(*where_clause).order_by(order_column.desc()).limit(1)
@@ -114,10 +166,10 @@ class AsyncBaseController[
         sort_by_attribute: str = "registered_at"
     ) -> Tuple[List[ModelType], int]:
         """
-        Devuelve una lista de registros que cumplen con las condiciones dadas y el conteo total de registros que coinciden.
+        Devuelve una lista de registros que cumplen con las condiciones y el conteo total de registros que coinciden.
 
         Args:
-            where_clause (List[Any]): Lista de expresiones condicionales de SQLAlchemy/SQLModel para filtrar los registros.
+            where_clause (List[Any]): Lista de expresiones condicionales de SQLModel para filtrar los registros.
             skip (int): Número de registros a omitir para la paginación.
             limit (int): Número máximo de registros a devolver.
             sort_by_attribute (str): Nombre del atributo por el cual ordenar los registros en orden descendente.
