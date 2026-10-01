@@ -1,12 +1,45 @@
 <!-- Plantilla para notificación de restauración de acceso a la cuenta -->
-{% set mail_title = "Su cuenta ha sido restaurada" %}
-{% set header_title = "Su cuenta ha sido restaurada" %}
-{% set header_subtitle = "El acceso a su cuenta ha sido reestablecido." %}
-{% set header_class = "bg-default" %}
+{% set mail_title = "Su cuenta ha sido reactivada" %}
+{% set header_title = "Cuenta Reactivada" %}
+{% set header_subtitle = "El acceso a su cuenta ha sido reestablecido con éxito." %}
+{% set header_class = "bg-success" %}
 
 {% include 'partials/_head.html' %}
 {% include 'partials/_header.html' %}
 
-<!--#TODO: contenido de la plantilla de usuario reactivado -->
+<!-- Contenido principal -->
+<div class="content">
+    <p>Estimado/a <strong>{{ username }}</strong>,</p>
+
+    <p>Le informamos que el acceso a su cuenta registrada con el correo <strong>{{ email }}</strong> ha sido reestablecido satisfactoriamente por la administración del sistema.</p>
+
+    <!-- Detalles del estado de la cuenta -->
+    <table class="data-table">
+        <tbody>
+            <tr>
+                <th>Usuario</th>
+                <td>{{ username }}</td>
+            </tr>
+            <tr>
+                <th>Correo Electrónico</th>
+                <td>{{ email }}</td>
+            </tr>
+            <tr>
+                <th>Estado de la Cuenta</th>
+                <td><span class="badge bg-success">ACTIVO</span></td>
+            </tr>
+            {% if date %}
+            <tr>
+                <th>Fecha de Reactivación</th>
+                <td>{{ date }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <p>A partir de este momento, ya puede iniciar sesión de manera habitual para acceder a la plataforma y hacer uso de todos sus módulos.</p>
+
+    <p>Si no ha solicitado esta activación o detecta alguna actividad inusual, por favor póngase en contacto inmediato con el equipo de soporte.</p>
+</div>
 
 {% include 'partials/_footer.html' %}
