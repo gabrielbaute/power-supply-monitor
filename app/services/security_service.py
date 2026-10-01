@@ -129,8 +129,8 @@ class SecurityService:
         """
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            user_id: str = payload.get("sub")
-            token_scope: str = payload.get("scope")
+            user_id: Optional[str] = payload.get("sub")
+            token_scope: Optional[str] = payload.get("scope")
 
             if user_id is None or token_scope != expected_scope:
                 raise AuthenticationError(
