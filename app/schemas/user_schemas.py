@@ -8,7 +8,7 @@ from app.enums import UserRole, UserStatus
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
-    password: str
+    password_hash: str
     role: UserRole
     status: UserStatus
 
