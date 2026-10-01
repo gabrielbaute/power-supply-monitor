@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     API_PORT: int = 8095
     API_RELOAD: bool = False
     API_LOG_LEVEL: str = "info"
+    URL_BASE: str = f"{API_HOST}:{API_PORT}"
 
     # ------------ MAIL ------------
     MAIL_HOST: str = "smtp.google.com"
