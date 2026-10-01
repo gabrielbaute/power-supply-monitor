@@ -13,6 +13,7 @@ from app.controllers import UserController
 from app.services.mail_service import MailService
 from app.services.security_service import SecurityService
 from app.schemas import (
+    UserRegisterRequest,
     UserCreate,
     UserUpdate,
     UserResponse,
@@ -150,8 +151,7 @@ class UserService:
     # ========= MÉTODOS DE AUTENTICACIÓN =========
     async def register_user(
         self,
-        user_data: UserCreate,
-        password: str
+        user_data: UserRegisterRequest,
     ) -> Optional[UserResponse]:
         """
         Orquesta el registro completo de un nuevo usuario:
@@ -159,18 +159,23 @@ class UserService:
         2. Crea el registro en la tabla de usuarios.
 
         Args:
-            user_data (UserCreate): Datos de registro del usuario.
-            password (str): Contraseña del usuario
+            user_data (UserRegisterRequest): Datos de registro del usuario.
 
         Returns:
             Optional[UserResponse]: Datos del usuario creado o None si falla.
         """
         try:
             # 1. Seguridad: Hashear contraseña
-            hashed_password = self.security_service.get_password_hash(password)
-            user_data.password_hash = hashed_password
+            hashed_password = self.security_service.get_password_hash(user_data.password)
+            new_user_data = UserCreate(
+                username=user_data.username,
+                email=user_data.email,
+                password_hash=hashed_password,
+                status=UserStatus.ACTIVE,
+                role=UserRole.USER
+            )
             # 2. Persistencia: Crear usuario en DB
-            new_user_db = await self.controller.create_user(user_data)
+            new_user_db = await self.controller.create_user(new_user_data)
             if not new_user_db:
                 raise ValidationError(
                     message="No se pudo crear el usuario en la DB.",
