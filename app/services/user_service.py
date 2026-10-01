@@ -57,7 +57,7 @@ class UserService:
         try:
             await self.mail_service.send_templated_email(
                 recipient=user.email,
-                subject="Actualización de cuenta",
+                subject=subject if subject else "Actualización de cuenta",
                 template=template,
                 context={"user_name": user.username}
             )
