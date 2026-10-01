@@ -217,7 +217,7 @@ class UserController(
                 details={"detail": str(e)}
             ) from e
 
-    async def update_user_password(self, user_id: UUID, hashed_password: str) -> Optional[bool]:
+    async def update_user_password(self, user_id: UUID, hashed_password: str) -> bool:
         """
         Actualiza la contraseña de un usuario existente.
 
@@ -229,12 +229,7 @@ class UserController(
             Optional[bool]: True si la actualización fue exitosa, False en caso contrario.
         """
         db_obj = await self._get_or_raise(db_obj_id=user_id)
-        if not db_obj:
-            self.logger.warning(f"Usuario {user_id} no encontrado.")
-            return None
-
         db_obj.password_hash = hashed_password
-
         if not await self._update_or_rollback(db_obj):
             self.logger.error(f"Error al actualizar la contraseña de {user_id}")
             return False
