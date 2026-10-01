@@ -198,27 +198,31 @@ class UserService:
 
         Returns:
             Optional[UserResponse]: Datos del usuario autenticado o None si falla.
+
+        Raises:
+            ResourceNotFoundError: Si el usuario no está registrado o no existe.
+            PermissionDeniedError: Si el usuario está bloqueado o inactivo o si las credenciales no coinciden.
         """
         user = await self.controller.get_user_by_email(login_credentials.email)
 
         if not user:
             raise ResourceNotFoundError(
                 message="Fallo en proceso de login",
-                details={"Detalle de error:": f"Usuario con email {login_credentials.email} no encontrado."}
+                details={"detail": f"Usuario con email {login_credentials.email} no encontrado."}
             )
 
         # Bloqueamos a los baneados
         if user.status == UserStatus.BLOCK:
             raise PermissionDeniedError(
                 message="Fallo en proceso de autenticación",
-                details={"Detalle de error:": "Cuenta bloqueada. Contacte a soporte."}
+                details={"detail": "Cuenta bloqueada. Contacte a soporte."}
             )
 
         # Bloqueamos a los que aún no activan su cuenta.
         if user.status == UserStatus.INACTIVE:
             raise PermissionDeniedError(
                 message="Fallo en proceso de autenticación",
-                details={"Detalle de error:": "Debe validar su cuenta antes de iniciar sesión."}
+                details={"detail": "Debe activar su cuenta antes de iniciar sesión."}
             )
 
         user_credentials = await self.controller.get_user_password_hash(user.id)
@@ -277,6 +281,10 @@ class UserService:
 
         Returns:
             Optional[bool]: True si la actualización fue exitosa, False en caso contrario.
+
+        Raises:
+            ResourceNotFoundError: Si el usuario no está registrado.
+            PermissionDeniedError: Si el estatus del usuario esta bloqueado o si no es un administrador.
         """
         user = await self.controller.get_user_by_id(user_id)
         if not user:
