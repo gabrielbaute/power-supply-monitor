@@ -1,4 +1,5 @@
 from app.errors.base_error import GeneralError
+from app.errors.authentication_errors import AuthenticationError
 from app.errors.database_errors import (
     DatabaseOperationError,
     DatabaseSessionError,
@@ -9,4 +10,9 @@ from app.errors.mail_errors import (
     SendMailError,
     TemplateMailNotFound,
     BuildMessageError
+)
+from app.errors.user_errors import (
+    ResourceNotFoundError,
+    ValidationError,
+    PermissionDeniedError
 )

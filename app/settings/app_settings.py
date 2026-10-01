@@ -51,19 +51,33 @@ class Settings(BaseSettings):
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_PRE_PING: bool = True
 
+    # ----------- ADMIN_CREDENTIALS ------------
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "admin"
+    ADMIN_EMAIL: str = "mail@admin.com"
+
     # ----------- API ------------
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8095
     API_RELOAD: bool = False
     API_LOG_LEVEL: str = "info"
+    URL_BASE: str = f"{API_HOST}:{API_PORT}"
 
-    # ------------ Mail ------------
+    # ------------ MAIL ------------
     MAIL_HOST: str = "smtp.google.com"
     MAIL_PORT: int = 587
     MAIL_USERNAME: str = "yourmail@gmail.com"
     MAIL_PASSWORD: str = "your-email-password"
     MAIL_USE_TLS: bool = True
     MAIL_USE_SSL: bool = False
+
+    # ------------ SEGURIDAD ------------
+    SECRET_KEY: str = "placeholder-dev-key"
+    SECURITY_PASSWORD_SALT: str = "placeholder-salt"
+    JWT_SECRET_KEY: str = "placeholder-jwt-key"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 10080
 
     model_config = SettingsConfigDict(
         env_file=".env",

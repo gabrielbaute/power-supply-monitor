@@ -1,0 +1,51 @@
+<!-- Plantilla para notificación de bloqueo de cuenta. -->
+{% set mail_title = "Su cuenta ha sido suspendida" %}
+{% set header_title = "Cuenta Suspendida" %}
+{% set header_subtitle = "Se ha suspendido o restringido el acceso a su cuenta." %}
+{% set header_class = "bg-danger" %}
+
+{% include 'partials/_head.html' %}
+{% include 'partials/_header.html' %}
+
+<!-- Contenido principal -->
+<div class="content">
+    <p>Estimado/a <strong>{{ username }}</strong>,</p>
+
+    <p>Le notificamos que el acceso a su cuenta asociada a la dirección <strong>{{ email }}</strong> ha sido suspendido temporal o permanentemente por el administrador del sistema.</p>
+
+    <!-- Detalles de la suspensión -->
+    <table class="data-table">
+        <tbody>
+            <tr>
+                <th>Usuario</th>
+                <td>{{ username }}</td>
+            </tr>
+            <tr>
+                <th>Correo Electrónico</th>
+                <td>{{ email }}</td>
+            </tr>
+            <tr>
+                <th>Estado de la Cuenta</th>
+                <td><span class="badge bg-danger">BLOQUEADO</span></td>
+            </tr>
+            {% if reason %}
+            <tr>
+                <th>Motivo de la Medida</th>
+                <td>{{ reason }}</td>
+            </tr>
+            {% endif %}
+            {% if date %}
+            <tr>
+                <th>Fecha de Registro</th>
+                <td>{{ date }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <p>Durante este período no podrá acceder a las funciones del sistema ni autenticarse en los servicios de la plataforma.</p>
+
+    <p>Si considera que se trata de un error o requiere información adicional sobre el motivo de esta suspensión, responda o solicite asistencia a través del canal de soporte administrativo.</p>
+</div>
+
+{% include 'partials/_footer.html' %}

@@ -1,4 +1,5 @@
 from uuid import UUID, uuid4
+from typing import Optional
 from datetime import datetime, UTC
 from sqlmodel import SQLModel, Field
 
@@ -20,7 +21,7 @@ class ElectricEventSQLModel(SQLModel, table=True):
 
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     start_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), nullable=False,)
-    end_timestamp: datetime = Field(nullable=True)
+    end_timestamp: Optional[datetime] = Field(default=None, nullable=True)
     latitude: float = Field(nullable=False)
     longitude: float = Field(nullable=False)
     event_type: EventType = Field(default=EventType.CORTE)

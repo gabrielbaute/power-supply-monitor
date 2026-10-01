@@ -10,6 +10,8 @@ from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 from app.settings.app_settings import Settings, settings
+from app.services.security_service import SecurityService
+from app.managers.user_bootstrap_manager import UserBootstrapManager
 
 class DatabaseManager:
     """
@@ -90,6 +92,17 @@ class DatabaseManager:
             async with self.engine.begin() as conn:
                 await conn.run_sync(SQLModel.metadata.create_all)
             self.logger.info("Base de datos inicializada correctamente.")
+
+            # Semillado de usuario administrador
+            security_service = SecurityService()
+            bootstrap_manager = UserBootstrapManager(
+                security_service=security_service,
+                app_settings=settings,
+            )
+
+            async with self.async_session_maker() as session:
+                await bootstrap_manager.create_initial_admin(session=session)
+
         except Exception as e:
             self.logger.error(f"Error inicializando la base de datos: {e}")
             raise
