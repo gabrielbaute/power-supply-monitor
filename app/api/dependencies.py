@@ -1,10 +1,10 @@
 """
 Módulo de control de inyección de dependencias en la API
 """
-from typing import AsyncGenerator, Optional
+from fastapi import Depends, Query
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import Depends, Header, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import AsyncGenerator, Optional
 
 from app.enums import UserRole, UserStatus
 from app.errors import AuthenticationError, PermissionDeniedError
