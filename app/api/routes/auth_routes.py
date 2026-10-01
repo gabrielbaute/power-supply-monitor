@@ -1,14 +1,15 @@
 """
 Módulo de rutas de autenticación de la API.
 """
+from typing import Optional
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, status, Depends
 
+from app.enums import UserStatus
 from app.api.dependencies import get_mail_service, get_user_service
 from app.services import SecurityService, UserService, MailService
-from app.schemas import UserLogin, UserCreate, UserResponse
-from app.schemas.auth_schemas import Token, PasswordResetConfirm
-from app.enums import UserStatus
+from app.schemas.auth_schemas import Token, PasswordResetConfirm, UserLogin
+from app.schemas.user_schemas import UserCreate, UserResponse, UserRegisterRequest
 
 from app.errors import ResourceNotFoundError, PermissionDeniedError, ValidationError, GeneralError
 
@@ -53,24 +54,14 @@ async def login_for_access_token(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
-    user_data: UserCreate,
-    password: str,
+    user_data: UserRegisterRequest,
     user_service: UserService = Depends(get_user_service)
-):
+) -> Optional[UserResponse]:
     """
     Registro público de nuevos usuarios.
     Se encarga de crear el registro en DB y la estructura de carpetas física.
     """
-    try:
-        user = await user_service.register_user(
-            user_data=user_data,
-            password=password
-        )
-        return user
-    except Exception as e:
-        raise ValidationError(
-            details={"detail": str(e)}
-        ) from e
+    return await user_service.register_user(user_data=user_data)
 
 @router.post("/password-recovery", status_code=status.HTTP_200_OK)
 async def request_recovery(
@@ -104,7 +95,7 @@ async def request_recovery(
 async def reset_password(
     data: PasswordResetConfirm,
     user_service: UserService = Depends(get_user_service)
-):
+) -> dict[str, str]:
     """
     Cambia la contraseña usando un token de scope 'password_reset'.
     """
