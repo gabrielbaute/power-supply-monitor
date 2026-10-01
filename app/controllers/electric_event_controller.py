@@ -93,7 +93,7 @@ class ElectricEventController(
             Optional[ElectricEventSQLModel]: El evento abierto más reciente, o None si no hay ninguno.
         """
         return await self.get_last_register_with_conditions(
-            where_clause=[ElectricEventSQLModel.end_timestamp is None],
+            where_clause=[ElectricEventSQLModel.end_timestamp==None],
             sort_by_attribute="start_timestamp"
         )
 
