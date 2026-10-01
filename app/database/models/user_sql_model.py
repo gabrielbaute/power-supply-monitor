@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID, uuid4
 from datetime import datetime, UTC
 from sqlmodel import SQLModel, Field
@@ -25,6 +26,6 @@ class UserSQLModel(SQLModel, table=True):
     email: str = Field(nullable=False, index=True, unique=True)
     password_hash: str = Field(nullable=False, max_length=255)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC), nullable=False)
-    updated_at: datetime = Field(nullable=True)
+    updated_at: Optional[datetime] = Field(default=None, nullable=True)
     role: UserRole = Field(default=UserRole.USER, index=True)
     status: UserStatus = Field(default=UserStatus.INACTIVE, index=True)
