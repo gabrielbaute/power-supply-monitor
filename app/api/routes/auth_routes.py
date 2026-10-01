@@ -29,22 +29,12 @@ async def login_for_access_token(
     )
 
     # El servicio ya maneja la lógica de hash y verificación
-    user = await user_service.authenticate_user(login_credentials)
-
-    if not user:
-        raise ResourceNotFoundError(
-            message="Credenciales invalidas o usuario no registrado."
-        )
-
-    if not user.status == UserStatus.ACTIVE:
-        raise PermissionDeniedError(
-            message="La cuenta de usuario no está activa"
-        )
+    user: Optional[UserResponse] = await user_service.authenticate_user(login_credentials)
 
     # Generamos el token de acceso
     security = SecurityService()
     access_token = security.create_access_token(
-        data={"sub": str(user.id), "scope": "access"}
+        data={"sub": str(user.id), "scope": "access"} #type: ignore
     )
 
     return {
@@ -100,26 +90,15 @@ async def reset_password(
     Cambia la contraseña usando un token de scope 'password_reset'.
     """
     security = SecurityService()
+    # 1. Validamos el token específico para reset
+    token_data = security.decode_token(data.token, expected_scope="password_reset")
 
-    try:
-        # 1. Validamos el token específico para reset
-        token_data = security.decode_token(data.token, expected_scope="password_reset")
+    # 2. Hasheamos la nueva password
+    hashed_password = security.get_password_hash(data.new_password)
 
-        # 2. Hasheamos la nueva password
-        hashed_password = security.get_password_hash(data.new_password)
-
-        # 3. Actualizamos
-        success = await user_service.controller.update_user_password(
-            token_data.user_id, #type: ignore
-            hashed_password
-        )
-
-        if not success:
-            raise ValidationError(message="No se pudo actualizar la contraseña.")
-
-    except Exception as e:
-        raise ValidationError(
-            details={"detail": str(e)}
-        ) from e
-
+    # 3. Actualizamos
+    await user_service.update_user_password(
+        user_id=token_data.user_id, #type: ignore
+        hashed_password=hashed_password
+    )
     return {"message": "Contraseña actualizada correctamente."}
