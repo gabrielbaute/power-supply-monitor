@@ -180,12 +180,9 @@ class UserService:
             self.logger.info(f"Usuario {new_user_db.email} registrado exitosamente con ID {new_user_db.id}")
             return new_user_db
 
-        except Exception as e:
-            self.logger.error(f"Error en el proceso de registro: {e}")
-            raise ValidationError(
-                message="Error en el proceso de registro.",
-                details={"detail": str(e)}
-            ) from e
+        except Exception:
+            self.logger.exception("Error en el proceso de registro}")
+            raise
 
     async def authenticate_user(self, login_credentials: UserLogin) -> Optional[UserResponse]:
         """
