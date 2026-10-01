@@ -33,16 +33,16 @@ class UserService:
         security_service (SecurityService): Servicio de seguridad, autenticación y cifrado de la aplicación.
         logger (logging): Logger del módulo de servicio de usuario.
     """
-    def __init__(self, databasesession: AsyncSession, mail_service: MailService, settings: Settings):
+    def __init__(self, database_session: AsyncSession, mail_service: MailService, settings: Settings):
         """
         Inicializa el servicio de usuario con una sesión de base de datos.
 
         Args:
-            databasesession (AsyncSession): Sesión de base de datos.
+            database_session (AsyncSession): Sesión de base de datos.
             mail_service (MailService): Servicio de envío de notificaciones por correo.
             settings (Settings): Instancia global de configuración de la aplicación.
         """
-        self.database_session = databasesession
+        self.database_session = database_session
         self.settings = settings
         self.mail_service = mail_service
         self.controller = UserController(database_session=self.database_session)

@@ -7,7 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.settings import Settings, settings
 from app.managers import DatabaseManager, db_manager
-from app.services import ElectricEventService, LogService
+from app.services import (
+    ElectricEventService,
+    LogService,
+    MailService,
+    UserService
+)
 
 def get_settings_instance() -> Settings:
     """
@@ -51,3 +56,35 @@ def get_log_service(
         LogService: Servicio de gestión e inspección de logs.
     """
     return LogService(settings=settings_instance)
+
+def get_mail_service(
+    settings_instance: Settings = Depends(get_settings_instance)
+) -> MailService:
+    """
+    Inyecta una instancia del servicio MailService en la API.
+
+    Args:
+        settings_instance (Settings): Instancia global de configuración.
+
+    Returns:
+        MailService: Servicio de gestión de correo electrónico.
+    """
+    return MailService(settings=settings_instance)
+
+def get_user_iservice(
+    database_session: AsyncSession = Depends(get_db_session),
+    mail_service: MailService = Depends(get_mail_service),
+    settings_instance: Settings = Depends(get_settings_instance),
+) -> UserService:
+    """
+    Inyecta una instancia del servicio UserService en la API.
+
+    Args:
+        database_session
+        mail_service
+        settings_instance (Settings): Instancia global de configuración.
+
+    Returns:
+        UserService: Servicio de gestión de usuarios.
+    """
+    return UserService(database_session=database_session, mail_service=mail_service, settings=settings_instance)
