@@ -9,10 +9,18 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from app.errors import (
+    AuthenticationError,
     DatabaseOperationError,
     DatabaseSessionError,
     GeneralError,
     RegisterNotFoundError,
+    ResourceNotFoundError,
+    ValidationError,
+    PermissionDeniedError,
+    SMTPConnectionError,
+    SendMailError,
+    TemplateMailNotFound,
+    BuildMessageError
 )
 
 
@@ -26,9 +34,17 @@ class ErrorHandlerRegistry:
         """
         self.logger: logging.Logger = logging.getLogger(self.__class__.__name__)
         self._error_mapping: Dict[Type[GeneralError], int] = {
+            AuthenticationError: status.HTTP_401_UNAUTHORIZED,
             RegisterNotFoundError: status.HTTP_404_NOT_FOUND,
             DatabaseSessionError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             DatabaseOperationError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            ResourceNotFoundError: status.HTTP_404_NOT_FOUND,
+            ValidationError: status.HTTP_400_BAD_REQUEST,
+            PermissionDeniedError: status.HTTP_403_FORBIDDEN,
+            SMTPConnectionError: status.HTTP_503_SERVICE_UNAVAILABLE,
+            SendMailError: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            TemplateMailNotFound: status.HTTP_500_INTERNAL_SERVER_ERROR,
+            BuildMessageError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         }
 
     def get_status_code(self, exception_type: Type[GeneralError]) -> int:
