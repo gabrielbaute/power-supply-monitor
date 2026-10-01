@@ -5,12 +5,17 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 
 from app.enums import UserRole, UserStatus
 
+class UserRegisterRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password_hash: str
-    role: UserRole
     status: UserStatus
+    role: UserRole
 
     model_config = ConfigDict(from_attributes=True)
 
