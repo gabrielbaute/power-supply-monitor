@@ -2,21 +2,29 @@
 Módulo de seguridad y autenticación de usuarios.
 """
 from typing import Optional
-from jose import jwt, JWTError
-from passlib.context import CryptContext
-from passlib.handlers import bcrypt
 from datetime import datetime, timedelta, UTC
+from jose import jwt, JWTError
+from pwdlib import PasswordHash
+from pwdlib.hashers.argon2 import Argon2Hasher
+from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.settings import settings
 from app.schemas import TokenData, Token
 from app.errors import AuthenticationError
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hash = PasswordHash(
+    (
+        Argon2Hasher(),
+        BcryptHasher(),
+    )
+)
+
 
 class SecurityService:
     """
     Servicio de seguridad y autenticación de usuarios.
     """
+
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
@@ -29,20 +37,20 @@ class SecurityService:
         Returns:
             bool: True si las contraseñas coinciden, False en caso contrario.
         """
-        return pwd_context.verify(plain_password, hashed_password)
+        return password_hash.verify(plain_password, hashed_password)
 
     @staticmethod
     def get_password_hash(password: str) -> str:
         """
-        Hash una contraseña plana utilizando bcrypt.
+        Hash una contraseña plana utilizando Argon2id mediante pwdlib.
 
         Args:
             password (str): La contraseña plana a hashear.
 
         Returns:
-            str: La contraseña hasheada.
+            str: La contraseña hasheada en formato Argon2id.
         """
-        return pwd_context.hash(password)
+        return password_hash.hash(password)
 
     @staticmethod
     def _create_generic_token(data: dict, expires_delta: timedelta, scope: str) -> str:
@@ -115,14 +123,14 @@ class SecurityService:
     @staticmethod
     def decode_token(token: str, expected_scope: str) -> TokenData:
         """
-        Decodifica y valida un token JWT basado en el alcance esperado (scoop).
+        Decodifica y valida un token JWT basado en el alcance esperado (scope).
 
         Args:
             token (str): La cadena JWT a decodificar.
-            expected_scope (str): El alcance o scoop esperado (access, password_reset, o email_verify).
+            expected_scope (str): El alcance esperado (access, password_reset, o email_verify).
 
         Returns:
-            TokenData: Datos validos del token.
+            TokenData: Datos válidos del token.
 
         Raises:
             AuthenticationError: Si el token es inválido, expira o tiene el alcance incorrecto.
