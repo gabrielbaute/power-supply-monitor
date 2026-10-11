@@ -20,7 +20,12 @@ from app.schemas import (
     UserListResponse,
     UserLogin
 )
-from app.errors import ResourceNotFoundError, ValidationError, PermissionDeniedError
+from app.errors import (
+    DatabaseSessionError,
+    PermissionDeniedError,
+    ResourceNotFoundError,
+    ValidationError,
+)
 
 class UserService:
     """
@@ -46,9 +51,26 @@ class UserService:
         self.database_session = database_session
         self.settings = settings
         self.mail_service = mail_service
-        self.controller = UserController(database_session=self.database_session)
         self.security_service = SecurityService()
         self.logger = logging.getLogger(self.__class__.__name__)
+
+    @property
+    def controller(self) -> UserController:
+        """
+        Proporciona una instancia de UserController.
+
+        Returns:
+            UserController
+
+        Raises:
+            DatabaseSessionError: si no se provee una instancia de la base de datos.
+        """
+        if not self.database_session:
+            raise DatabaseSessionError(
+                message="Se requiere una sesión de la base de datos para operar",
+                details={"error": "Sesión de base de datos no proveída."}
+            )
+        return UserController(database_session=self.database_session)
 
     # ========= MÉTODOS PRIVADOS =========
     async def _mail_service_notification(self, user: UserResponse, template: str, subject: Optional[str] = None):

@@ -7,6 +7,7 @@ from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import EventType
+from app.errors import DatabaseSessionError
 from app.controllers import ElectricEventController
 from app.schemas.electric_event_schemas import (
     ElectricEventCreate,
@@ -17,8 +18,17 @@ from app.schemas.electric_event_schemas import (
 
 class ElectricEventService:
     def __init__(self, database_session: AsyncSession):
-        self.controller = ElectricEventController(database_session=database_session)
+        self.database_session = database_session
         self.logger = logging.getLogger(self.__class__.__name__)
+
+    @property
+    def controller(self) -> ElectricEventController:
+        if not self.database_session:
+            raise DatabaseSessionError(
+                message="Se requiere una sesión de la base de datos para operar",
+                details={"error": "Sesión de base de datos no proveída."}
+            )
+        return ElectricEventController(database_session=self.database_session)
 
     async def register_event(self, event_data: ElectricEventCreate) -> Optional[ElectricEventResponse]:
         event_register = await self.controller.register_event(event_data=event_data)
