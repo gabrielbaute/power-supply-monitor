@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     # ----------- WEBHOOKS ------------
     NTFY_TOPIC: str
     NTFY_URL: str
+    NTFY_USER: str = ""
+    NTFY_PASSWORD: str = ""
+    NTFY_TOKEN: str = ""
 
     # ----------- DEBOUNCE ------------
     CONFIRMATION_READS: int = 3  # lecturas consecutivas para confirmar un cambio de estado
