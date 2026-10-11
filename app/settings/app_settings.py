@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     LONGITUDE: float
 
     # ----------- WEBHOOKS ------------
-    NTFY_TOPIC: str
-    NTFY_URL: str
+    NTFY_TOPIC: str = ""
+    NTFY_URL: str = ""
     NTFY_USER: str = ""
     NTFY_PASSWORD: str = ""
     NTFY_TOKEN: str = ""
