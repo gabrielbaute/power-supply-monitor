@@ -29,3 +29,6 @@ power_supply
 # Logs
 logs/
 *.log
+
+# Dev y Test
+dev/
