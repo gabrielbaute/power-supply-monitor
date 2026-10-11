@@ -37,7 +37,8 @@ class Settings(BaseSettings):
     LONGITUDE: float
 
     # ----------- WEBHOOKS ------------
-    NTFY_TOPIC: str = ""
+    NTFY_TOPIC: str = "nty_push_topic"
+    NTFY_ANDROID_TOPIC: str = "android_push_topic"
     NTFY_URL: str = ""
     NTFY_USER: str = ""
     NTFY_PASSWORD: str = ""
