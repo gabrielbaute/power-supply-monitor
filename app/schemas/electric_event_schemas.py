@@ -22,7 +22,20 @@ class ElectricEventCreate(BaseModel):
     longitude: float
     event_type: EventType = EventType.CORTE
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "examples": [
+                {
+                    "start_timestamp": "2026-10-01T07:43:14.890702",
+                    "end_timestamp": None,
+                    "latitude": 10.48801,
+                    "longitude": -66.87919,
+                    "event_type": "CORTE"
+                },
+            ],
+        }
+    )
 
 class ElectricEventUpdate(BaseModel):
     """
@@ -41,7 +54,20 @@ class ElectricEventUpdate(BaseModel):
     longitude: Optional[float] = None
     event_type: Optional[EventType] = None
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "examples": [
+                {
+                    "start_timestamp": "2026-10-01T07:43:14.890702",
+                    "end_timestamp": "2026-10-01T10:45:00.00",
+                    "latitude": 10.48801,
+                    "longitude": -66.87919,
+                    "event_type": "CORTE"
+                },
+            ]
+        }
+    )
 
 class ElectricEventResponse(BaseModel):
     """
@@ -62,7 +88,21 @@ class ElectricEventResponse(BaseModel):
     longitude: float
     event_type: EventType
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "examples": [
+                {
+                    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                    "start_timestamp": "2026-10-01T07:43:14.890702",
+                    "end_timestamp": "2026-10-01T10:45:00.00",
+                    "latitude": 10.48801,
+                    "longitude": -66.87919,
+                    "event_type": "CORTE"
+                },
+            ]
+        }
+    )
 
 class ElectricEventListResponse(BaseModel):
     """
@@ -74,3 +114,31 @@ class ElectricEventListResponse(BaseModel):
     """
     events: List[ElectricEventResponse] = []
     count: int = 0
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "events": [
+                        {
+                            "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                            "start_timestamp": "2026-10-01T07:43:14.890702",
+                            "end_timestamp": "2026-10-01T10:45:00.00",
+                            "latitude": 10.48801,
+                            "longitude": -66.87919,
+                            "event_type": "CORTE"
+                        },
+                        {
+                            "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                            "start_timestamp": "2026-10-02T09:43:14.890702",
+                            "end_timestamp": "2026-10-02T12:45:00.00",
+                            "latitude": 10.48801,
+                            "longitude": -66.87919,
+                            "event_type": "CORTE"
+                        }
+                    ],
+                    "counts": 2
+                }
+            ]
+        }
+    )
