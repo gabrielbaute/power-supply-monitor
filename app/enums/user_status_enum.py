@@ -1,7 +1,9 @@
 """Módulo para la representación de los estados de usuario posibles."""
 from enum import StrEnum
+from app.enums.base_enum import BaseEnum
 
-class UserStatus(StrEnum):
+
+class UserStatus(StrEnum, BaseEnum):
     """
     Estatus o estado del usuario
 
@@ -43,30 +45,3 @@ class UserStatus(StrEnum):
         raise ValueError(
             f"'{value}' no es un valor de estatus válido para UserStatus."
         )
-
-    @classmethod
-    def has_value(cls, value: str) -> bool:
-        """
-        Identifica si una cadena se corresponde con un valor de estatus o estado de usuario.
-
-        Args:
-            value (str): Valor de texto a validar.
-
-        Returns:
-            bool: True si el valor es un estatus de usuario válido, False en caso contrario.
-        """
-        try:
-            cls.from_value(value)
-            return True
-        except ValueError:
-            return False
-
-    @classmethod
-    def to_list(cls) -> list[str]:
-        """
-        Obtiene la lista completa de valores de estatus de usuario.
-
-        Returns:
-            list[str]: Lista con los identificadores de estatus de usuario.
-        """
-        return [item.value for item in cls]
