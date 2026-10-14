@@ -1,45 +1,20 @@
 """Módulo para la representación de los tipos de fallo eléctrico."""
 from enum import StrEnum
+from app.enums.base_enum import BaseEnum
 
-class EventType(StrEnum):
+
+class EventType(StrEnum, BaseEnum):
     """
     Tipo de evento eléctrico.
 
     Attributes:
         CORTE (str): Corte eléctrico.
-        CAIDA_TENSION (str): Caída de la tensión eléctrica en la red, sin que la electricidad se corte por completo.
+        CAIDA_TENSION (str): Caída de la tensión eléctrica en la red.
         FLUCTUACION (str): Fluctuación o pico en la red eléctrica.
     """
     CORTE = "CORTE"
     CAIDA_TENSION = "CAIDA_TENSION"
     FLUCTUACION = "FLUCTUACION"
-
-    @classmethod
-    def has_value(cls, value: str) -> bool:
-        """
-        Identifica si una cadena se corresponde con un valor del Enum.
-
-        Args:
-            value (str): Valor entero o texto a validar.
-
-        Returns:
-            bool: True si el valor es válido en el Enum, False en caso contrario.
-        """
-        try:
-            cls.from_value(value)
-            return True
-        except ValueError:
-            return False
-
-    @classmethod
-    def to_list(cls) -> list[str]:
-        """
-        Obtiene la lista completa de valores enteros del Enum.
-
-        Returns:
-            list[str]: Lista con los identificadores de tipo de evento.
-        """
-        return [item.value for item in cls]
 
     @classmethod
     def from_value(cls, value: str) -> 'EventType':
@@ -68,5 +43,5 @@ class EventType(StrEnum):
                 return name_mapping[clean_str]
 
         raise ValueError(
-            f"'{value}' no es un valor de evento válido para EventType. "
+            f"'{value}' no es un valor de evento válido para EventType."
         )
