@@ -1,7 +1,10 @@
+"""Módulo para la representación de los niveles de prioridad de notificación para ntfy."""
 from enum import IntEnum
 from typing import Union
+from app.enums.base_enum import BaseEnum
 
-class NTFYPriority(IntEnum):
+
+class NTFYPriority(IntEnum, BaseEnum):
     """
     Representa los niveles de prioridad de notificación para ntfy.
 
@@ -12,7 +15,6 @@ class NTFYPriority(IntEnum):
         LOW (int): Prioridad baja (ID: 2).
         MIN (int): Prioridad mínima (ID: 1).
     """
-
     MAX = 5
     HIGH = 4
     DEFAULT = 3
@@ -20,39 +22,9 @@ class NTFYPriority(IntEnum):
     MIN = 1
 
     @classmethod
-    def has_value(cls, value: Union[int, str]) -> bool:
-        """
-        Identifica si un entero o cadena se corresponde con un valor del Enum.
-
-        Args:
-            value (Union[int, str]): Valor entero o texto a validar.
-
-        Returns:
-            bool: True si el valor es válido en el Enum, False en caso contrario.
-        """
-        try:
-            cls.from_value(value)
-            return True
-        except ValueError:
-            return False
-
-    @classmethod
-    def to_list(cls) -> list[int]:
-        """
-        Obtiene la lista completa de valores enteros del Enum.
-
-        Returns:
-            list[int]: Lista con los identificadores numéricos de prioridad.
-        """
-        return [item.value for item in cls]
-
-    @classmethod
     def from_value(cls, value: Union[int, str]) -> "NTFYPriority":
         """
         Obtiene una instancia de NTFYPriority a partir de un entero o texto.
-
-        Acepta enteros (1-5), cadenas con números ("5") o cadenas con los nombres
-        oficiales de la documentación de ntfy ('max', 'urgent', 'high', 'default', 'low', 'min').
 
         Args:
             value (Union[int, str]): Identificador numérico o nombre de la prioridad.
@@ -69,7 +41,6 @@ class NTFYPriority(IntEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            # Mapeo de nombres y alias indicados en la documentación
             name_mapping: dict[str, NTFYPriority] = {
                 "max": cls.MAX,
                 "urgent": cls.MAX,
@@ -82,7 +53,6 @@ class NTFYPriority(IntEnum):
             if clean_str in name_mapping:
                 return name_mapping[clean_str]
 
-            # Intenta convertir cadenas numéricas como "5" o "1"
             if clean_str.isdigit():
                 return cls(int(clean_str))
 
