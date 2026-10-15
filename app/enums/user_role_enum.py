@@ -1,7 +1,8 @@
 """Módulo para la representación de los roles de usuario existentes."""
 from enum import StrEnum
+from app.enums.base_enum import BaseEnum
 
-class UserRole(StrEnum):
+class UserRole(BaseEnum, StrEnum):
     """
     Tipos de usuarios
 
@@ -29,41 +30,11 @@ class UserRole(StrEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            name_mapping: dict[str, UserRole] = {
-                "admin": cls.ADMIN,
-                "user": cls.USER,
-            }
+            name_mapping = {name.lower(): cls[name] for name in cls.enum_dict()}
 
             if clean_str in name_mapping:
                 return name_mapping[clean_str]
 
         raise ValueError(
-            f"'{value}' no es un valor de rol válido para UserRole. "
+            f"'{value}' no es un valor de rol válido para UserRole."
         )
-
-    @classmethod
-    def has_value(cls, value: str) -> bool:
-        """
-        Identifica si una cadena se corresponde con un valor de rol de usuario.
-
-        Args:
-            value (str): Valor de texto a validar.
-
-        Returns:
-            bool: True si el valor es un rol de usuario válido, False en caso contrario.
-        """
-        try:
-            cls.from_value(value)
-            return True
-        except ValueError:
-            return False
-
-    @classmethod
-    def to_list(cls) -> list[str]:
-        """
-        Obtiene la lista completa de valores de roles de usuario.
-
-        Returns:
-            list[str]: Lista con los identificadores de rol de usuario.
-        """
-        return [item.value for item in cls]
