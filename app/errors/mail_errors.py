@@ -16,6 +16,6 @@ class TemplateMailNotFound(GeneralError):
         super().__init__(message, details)
 
 class BuildMessageError(GeneralError):
-     """Error lanzado cuando falla el builder de email."""
-     def __init__(self, message: str = "Error al construir el mensaje en Jinja", details=None):
+    """Error lanzado cuando falla el builder de email."""
+    def __init__(self, message: str = "Error al construir el mensaje en Jinja", details=None):
         super().__init__(message, details)

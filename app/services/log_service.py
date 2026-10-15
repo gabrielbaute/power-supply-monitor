@@ -1,13 +1,13 @@
 """
 Módulo de servicio para la lectura y gestión de archivos de logs del sistema.
 """
-from collections import deque
+import asyncio
 import logging
+from collections import deque
 from pathlib import Path
 from typing import List
 
 from app.settings import Settings
-
 
 class LogService:
     """
@@ -30,9 +30,31 @@ class LogService:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.log_file_path: Path = self.settings.LOGS_DIR / "monitor.log"
 
+    def _read_log_file_sync(self, lines: int) -> List[str]:
+        """
+        Lee de forma síncrona las últimas N líneas del archivo de log.
+
+        Args:
+            lines (int): Cantidad de líneas a recuperar.
+
+        Returns:
+            List[str]: Lista de líneas obtenidas del archivo de log.
+
+        Raises:
+            FileNotFoundError: Si ocurre un error al intentar leer el archivo.
+        """
+        try:
+            with open(self.log_file_path, encoding="utf-8") as file:
+                # deque con maxlen lee de forma eficiente solo las últimas N líneas
+                tail_lines = deque(file, maxlen=lines)
+                return [line.rstrip("\r\n") for line in tail_lines]
+        except Exception as e:
+            self.logger.exception("Error al leer el archivo de log")
+            raise FileNotFoundError("Error al leer el archivo de log") from e
+
     async def get_tail_logs(self, lines: int = 25) -> List[str]:
         """
-        Obtiene las últimas N líneas del archivo de log del sistema.
+        Obtiene las últimas N líneas del archivo de log del sistema de forma asíncrona.
 
         Args:
             lines (int, optional): Cantidad de líneas a recuperar. Defaults to 25.
@@ -46,11 +68,4 @@ class LogService:
             )
             return []
 
-        try:
-            with open(self.log_file_path, mode="r", encoding="utf-8") as file:
-                # deque con maxlen lee de forma eficiente solo las últimas N líneas
-                tail_lines = deque(file, maxlen=lines)
-                return [line.rstrip("\r\n") for line in tail_lines]
-        except Exception as e:
-            self.logger.exception("Error al leer el archivo de log}")
-            raise FileNotFoundError("Error al leer el archivo de log") from e
+        return await asyncio.to_thread(self._read_log_file_sync, lines)
