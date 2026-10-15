@@ -56,9 +56,9 @@ class Settings(BaseSettings):
     DATABASE_POOL_PRE_PING: bool = True
 
     # ----------- ADMIN_CREDENTIALS ------------
-    ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD: str = "admin"
-    ADMIN_EMAIL: str = "mail@admin.com"
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    ADMIN_EMAIL: str
 
     # ----------- API ------------
     API_HOST: str = "0.0.0.0"
