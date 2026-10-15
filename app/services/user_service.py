@@ -85,7 +85,7 @@ class UserService:
                 context={"user_name": user.username}
             )
         except Exception as e:
-            self.logger.error(f"Failed to send status email to {user.email}: {e}")
+            self.logger.exception(f"Failed to send status email to {user.email}")
 
     async def _is_user_admin(self, user_id: UUID) -> bool:
         """
@@ -350,7 +350,7 @@ class UserService:
         Returns:
             UserListResponse: Lista de usuarios.
         """
-        if not self._is_user_admin(requester_id):
+        if not await self._is_user_admin(requester_id):
             raise PermissionDeniedError("Permisos insuficientes.")
 
         return await self.controller.get_all_users(skip, limit)
@@ -376,7 +376,7 @@ class UserService:
         Raises:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
         """
-        if not self._is_user_admin(requester_id):
+        if not await self._is_user_admin(requester_id):
             raise PermissionDeniedError("Permisos insuficientes.")
         users = await self.controller.get_users_by_status(
             status=status,
@@ -406,7 +406,7 @@ class UserService:
         Raises:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
         """
-        if not self._is_user_admin(requester_id):
+        if not await self._is_user_admin(requester_id):
             raise PermissionDeniedError("Permisos insuficientes.")
 
         users = await self.controller.get_users_by_role(
@@ -432,7 +432,7 @@ class UserService:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
             ResourceNotFoundError: En caso de que no se encuentre el registro del usuario a editar.
         """
-        if not self._check_permissions(user_id, requester_id):
+        if not await self._check_permissions(user_id, requester_id):
             raise PermissionDeniedError(message="Permisos insuficientes para esta acción")
 
         updated_user = await self.controller.update_user(user_id, update_data)
@@ -455,7 +455,7 @@ class UserService:
         Raises:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
         """
-        if not self._is_user_admin(requester_id):
+        if not await self._is_user_admin(requester_id):
             raise PermissionDeniedError(f"El usuario con ID {requester_id} no cuenta con privilegios suficientes.")
 
         subject = "Activación de cuenta"
@@ -475,7 +475,7 @@ class UserService:
         Raises:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
         """
-        if not self._check_permissions(user_id, requester_id):
+        if not await self._check_permissions(user_id, requester_id):
             raise PermissionDeniedError(message="Permisos insuficientes para esta acción")
 
         subject = "Su cuenta ha sido desactivada"
@@ -496,7 +496,7 @@ class UserService:
             PermissionDeniedError: Si el ejecutor no tiene privilegios de ADMIN.
         """
         if requester_id:
-            if not self._is_user_admin(requester_id):
+            if not await self._is_user_admin(requester_id):
                 raise PermissionDeniedError("Privilegios insuficientes para esta acción")
 
         subject = "Su cuenta ha sido bloqueada."
@@ -522,7 +522,7 @@ class UserService:
             self.logger.warning(f"Usuario {user_id} no encontrado")
             raise ResourceNotFoundError("Usuario no encontrado")
 
-        if not self._is_user_admin(requester_id):
+        if not await self._is_user_admin(requester_id):
             raise PermissionDeniedError("Privilegios insuficientes")
 
         return await self.controller.delete_user(user_id)
