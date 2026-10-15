@@ -137,7 +137,7 @@ class ElectricEventListResponse(BaseModel):
                             "event_type": "CORTE"
                         }
                     ],
-                    "counts": 2
+                    "count": 2
                 }
             ]
         }
