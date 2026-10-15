@@ -1,38 +1,11 @@
-"""Módulo que define la clase base abstracta para los enumeradores del sistema."""
-from abc import ABC, ABCMeta, abstractmethod
-from enum import EnumMeta
+"""Módulo que define la clase mixin base para los enumeradores del sistema."""
 from typing import Any
 
-
-class EnumABCMeta(EnumMeta, ABCMeta):
+class BaseEnum:
     """
-    Metaclase combinada para resolver el conflicto entre EnumMeta y ABCMeta,
-    permitiendo heredar simultáneamente de Enum y ABC.
+    Clase base mixin para centralizar la lógica común de los Enums
+    sin generar conflictos de metaclases con EnumMeta.
     """
-    pass
-
-
-class BaseEnum(ABC, metaclass=EnumABCMeta):
-    """
-    Clase base abstracta para centralizar la lógica común de los Enums.
-    """
-
-    @classmethod
-    @abstractmethod
-    def from_value(cls, value: Any) -> "BaseEnum":
-        """
-        Obtiene una instancia del Enum a partir de un valor dado.
-
-        Args:
-            value (Any): Valor a convertir en instancia del enum.
-
-        Returns:
-            BaseEnum: Instancia correspondiente del enum.
-
-        Raises:
-            ValueError: Si el valor suministrado no es válido.
-        """
-        pass
 
     @classmethod
     def has_value(cls, value: Any) -> bool:
@@ -46,7 +19,7 @@ class BaseEnum(ABC, metaclass=EnumABCMeta):
             bool: True si el valor es válido, False en caso contrario.
         """
         try:
-            cls.from_value(value)
+            cls.from_value(value)  # type: ignore[attr-defined]
             return True
         except ValueError:
             return False
