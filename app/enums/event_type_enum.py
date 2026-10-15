@@ -2,8 +2,7 @@
 from enum import StrEnum
 from app.enums.base_enum import BaseEnum
 
-
-class EventType(StrEnum, BaseEnum):
+class EventType(BaseEnum, StrEnum):
     """
     Tipo de evento eléctrico.
 
@@ -33,11 +32,7 @@ class EventType(StrEnum, BaseEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            name_mapping: dict[str, EventType] = {
-                "corte": cls.CORTE,
-                "caida_tension": cls.CAIDA_TENSION,
-                "fluctuacion": cls.FLUCTUACION
-            }
+            name_mapping = {name.lower(): cls[name] for name in cls.enum_dict()}
 
             if clean_str in name_mapping:
                 return name_mapping[clean_str]

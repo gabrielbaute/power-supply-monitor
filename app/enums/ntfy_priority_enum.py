@@ -3,8 +3,7 @@ from enum import IntEnum
 from typing import Union
 from app.enums.base_enum import BaseEnum
 
-
-class NTFYPriority(IntEnum, BaseEnum):
+class NTFYPriority(BaseEnum, IntEnum):
     """
     Representa los niveles de prioridad de notificación para ntfy.
 
@@ -41,14 +40,7 @@ class NTFYPriority(IntEnum, BaseEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            name_mapping: dict[str, NTFYPriority] = {
-                "max": cls.MAX,
-                "urgent": cls.MAX,
-                "high": cls.HIGH,
-                "default": cls.DEFAULT,
-                "low": cls.LOW,
-                "min": cls.MIN,
-            }
+            name_mapping = {name.lower(): cls[name] for name in cls.enum_dict()}
 
             if clean_str in name_mapping:
                 return name_mapping[clean_str]

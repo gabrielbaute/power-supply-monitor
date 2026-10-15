@@ -2,8 +2,7 @@
 from enum import StrEnum
 from app.enums.base_enum import BaseEnum
 
-
-class UserRole(StrEnum, BaseEnum):
+class UserRole(BaseEnum, StrEnum):
     """
     Tipos de usuarios
 
@@ -31,10 +30,7 @@ class UserRole(StrEnum, BaseEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            name_mapping: dict[str, UserRole] = {
-                "admin": cls.ADMIN,
-                "user": cls.USER,
-            }
+            name_mapping = {name.lower(): cls[name] for name in cls.enum_dict()}
 
             if clean_str in name_mapping:
                 return name_mapping[clean_str]

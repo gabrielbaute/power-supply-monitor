@@ -2,8 +2,7 @@
 from enum import StrEnum
 from app.enums.base_enum import BaseEnum
 
-
-class UserStatus(StrEnum, BaseEnum):
+class UserStatus(BaseEnum, StrEnum):
     """
     Estatus o estado del usuario
 
@@ -33,11 +32,7 @@ class UserStatus(StrEnum, BaseEnum):
         if isinstance(value, str):
             clean_str = value.strip().lower()
 
-            name_mapping: dict[str, UserStatus] = {
-                "active": cls.ACTIVE,
-                "inactive": cls.INACTIVE,
-                "block": cls.BLOCK
-            }
+            name_mapping = {name.lower(): cls[name] for name in cls.enum_dict()}
 
             if clean_str in name_mapping:
                 return name_mapping[clean_str]
