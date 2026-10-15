@@ -52,5 +52,5 @@ class LogService:
                 tail_lines = deque(file, maxlen=lines)
                 return [line.rstrip("\r\n") for line in tail_lines]
         except Exception as e:
-            self.logger.exception("Error al leer el archivo de log}")
+            self.logger.exception("Error al leer el archivo de log")
             raise FileNotFoundError("Error al leer el archivo de log") from e
