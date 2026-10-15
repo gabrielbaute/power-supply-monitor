@@ -44,7 +44,7 @@ class LogService:
             FileNotFoundError: Si ocurre un error al intentar leer el archivo.
         """
         try:
-            with open(self.log_file_path, mode="r", encoding="utf-8") as file:
+            with open(self.log_file_path, encoding="utf-8") as file:
                 # deque con maxlen lee de forma eficiente solo las últimas N líneas
                 tail_lines = deque(file, maxlen=lines)
                 return [line.rstrip("\r\n") for line in tail_lines]
@@ -68,5 +68,4 @@ class LogService:
             )
             return []
 
-        # Ejecutamos la operación bloqueante en un hilo independiente para no bloquear el event loop
         return await asyncio.to_thread(self._read_log_file_sync, lines)
