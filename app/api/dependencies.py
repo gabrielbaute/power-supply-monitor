@@ -15,6 +15,7 @@ from app.services import (
     ElectricEventService,
     LogService,
     MailService,
+    NtfysService,
     SecurityService,
     UserService
 )
@@ -81,6 +82,20 @@ def get_mail_service(
         MailService: Servicio de gestión de correo electrónico.
     """
     return MailService(settings=settings_instance)
+
+def get_ntfy_service(
+    settings_instance: Settings = Depends(get_settings_instance),
+) -> NtfysService:
+    """
+    Inyecta una instancia del servicio NtfysService en la API.
+
+    Args:
+        settings_instance (Settings): Instancia global de configuración.
+
+    Returns:
+        NtfysService: Servicio para el envío de notificaciones push vía NTFY.
+    """
+    return NtfysService(settings=settings_instance)
 
 def get_user_service(
     database_session: AsyncSession = Depends(get_db_session),
