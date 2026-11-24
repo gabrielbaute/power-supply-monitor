@@ -32,10 +32,10 @@ class NTFYPayload(BaseModel):
         json_schema_extra={
             "examples": [
                 {
-                    "title": "Alerta de Arbitraje",
+                    "title": "Alerta de corte eléctrico",
                     "priority": 4,
-                    "description": "El diferencial entre BCV y Binance supera el 5%.",
-                    "tags": "warning,moneybag",
+                    "description": "Se ha registrado una falla eléctrica",
+                    "tags": "warning,zap",
                     "icon": "https://midominio.com/logo.png",
                 }
             ]
