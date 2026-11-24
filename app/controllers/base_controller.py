@@ -112,12 +112,12 @@ class AsyncBaseController[
         Raises:
             RegisterNotFoundError: Si el ID no se corresponde con ningún registro.
         """
-        event_id = self._validate_uuid(db_obj_id)
-        obj = await self.get(id=db_obj_id)
+        item_id = self._validate_uuid(db_obj_id)
+        obj = await self.get(id=item_id)
         if obj is None:
             raise RegisterNotFoundError(
                 message="Registro de evento no encontrado en la base de datos.",
-                details={"detail": f"ID del objeto de evento: {event_id}",}
+                details={"detail": f"ID del objeto de evento: {item_id}",}
             )
         return obj
 
@@ -131,7 +131,8 @@ class AsyncBaseController[
         Returns:
             Optional[ModelType]: El objeto encontrado o None si no existe.
         """
-        statement = select(self.model).where(self.model.id == id) # type: ignore
+        valid_id = self._validate_uuid(id)
+        statement = select(self.model).where(self.model.id == valid_id) # type: ignore
         result = await self.database_session.execute(statement)
         return result.scalar_one_or_none()
 

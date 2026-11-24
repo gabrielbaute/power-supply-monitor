@@ -5,6 +5,7 @@ from fastapi import Depends, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncGenerator, Optional
+from uuid import UUID
 
 from app.enums import UserRole, UserStatus
 from app.errors import AuthenticationError, PermissionDeniedError
@@ -15,6 +16,7 @@ from app.services import (
     ElectricEventService,
     LogService,
     MailService,
+    NtfysService,
     SecurityService,
     UserService
 )
@@ -82,6 +84,20 @@ def get_mail_service(
     """
     return MailService(settings=settings_instance)
 
+def get_ntfy_service(
+    settings_instance: Settings = Depends(get_settings_instance),
+) -> NtfysService:
+    """
+    Inyecta una instancia del servicio NtfysService en la API.
+
+    Args:
+        settings_instance (Settings): Instancia global de configuración.
+
+    Returns:
+        NtfysService: Servicio para el envío de notificaciones push vía NTFY.
+    """
+    return NtfysService(settings=settings_instance)
+
 def get_user_service(
     database_session: AsyncSession = Depends(get_db_session),
     mail_service: MailService = Depends(get_mail_service),
@@ -143,7 +159,10 @@ async def get_current_user(
         )
 
         # 3. Recuperar usuario desde la base de datos
-        user = await user_service.controller.get_user_by_id(token_data.user_id) #type: ignore
+        if not token_data.user_id:
+            raise AuthenticationError(message="Token sin identificador de usuario")
+
+        user = await user_service.controller.get_user_by_id(UUID(token_data.user_id)) #type: ignore
 
         if user is None:
             raise ResourceNotFoundError(
