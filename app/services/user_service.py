@@ -73,7 +73,12 @@ class UserService:
         return UserController(database_session=self.database_session)
 
     # ========= MÉTODOS PRIVADOS =========
-    async def _mail_service_notification(self, user: UserResponse, template: str, subject: Optional[str] = None):
+    async def _mail_service_notification(
+        self,
+        user: UserResponse,
+        template: str,
+        subject: Optional[str] = None
+    ) -> None:
         """
         Método para envío de actualización de datos de la cuenta.
         """
@@ -84,8 +89,9 @@ class UserService:
                 template=template,
                 context={"user_name": user.username}
             )
-        except Exception as e:
+        except Exception:
             self.logger.exception(f"Failed to send status email to {user.email}")
+            raise
 
     async def _is_user_admin(self, user_id: UUID) -> bool:
         """

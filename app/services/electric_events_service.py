@@ -7,7 +7,7 @@ from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.enums import EventType
-from app.errors import DatabaseSessionError
+from app.errors import DatabaseSessionError, TimezoneRequiredError
 from app.controllers import ElectricEventController
 from app.schemas.electric_event_schemas import (
     ElectricEventCreate,
@@ -23,6 +23,28 @@ class ElectricEventService:
     def __init__(self, database_session: AsyncSession):
         self.database_session = database_session
         self.logger = logging.getLogger(self.__class__.__name__)
+
+    @staticmethod
+    def _ensure_timezone_aware(dt: datetime, field_name: str) -> None:
+        """
+        Valida que un objeto datetime contenga información explícita de zona horaria.
+
+        Args:
+            dt (datetime): Fecha y hora a validar.
+            field_name (str): Nombre del parámetro evaluado.
+
+        Raises:
+            TimezoneRequiredError: Si el datetime es naive (tzinfo es None o utcoffset es None).
+        """
+        if dt.tzinfo is None or dt.tzinfo.utcoffset(dt) is None:
+            raise TimezoneRequiredError(
+                message=f"El parámetro '{field_name}' debe incluir zona horaria explícita (formato ISO 8601 con offset, ej. '2026-11-01T00:00:00-04:00' o '2026-11-01T00:00:00Z').",
+                details={
+                    "field": field_name,
+                    "received": dt.isoformat(),
+                    "expected_format": "YYYY-MM-DDTHH:MM:SS±HH:MM",
+                },
+            )
 
     @property
     def controller(self) -> ElectricEventController:
@@ -114,7 +136,22 @@ class ElectricEventService:
     ) -> ElectricEventListResponse:
         """
         Obtiene los eventos eléctricos para un rango de fecha determinado.
+
+        Args:
+            start_date (datetime): Fecha y hora de inicio con zona horaria.
+            end_date (datetime): Fecha y hora de fin con zona horaria.
+            skip (int): Registros a omitir en la paginación.
+            limit (int): Máximo de registros a retornar.
+
+        Returns:
+            ElectricEventListResponse: Lista paginada de eventos y conteo total.
+
+        Raises:
+            TimezoneRequiredError: Si start_date o end_date no incluyen zona horaria.
         """
+        self._ensure_timezone_aware(start_date, "start_date")
+        self._ensure_timezone_aware(end_date, "end_date")
+
         event_registers = await self.controller.get_events_by_date_range(
             start_date=start_date,
             end_date=end_date,
