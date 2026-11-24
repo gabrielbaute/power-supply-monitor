@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.settings import Settings
+from app.api.errors_parser import register_error_handlers
 from app.api.include_routes import include_routers
 
 def create_app(settings: Settings) -> FastAPI:
@@ -34,6 +35,7 @@ def create_app(settings: Settings) -> FastAPI:
         allow_credentials=False,
     )
 
+    register_error_handlers(app)
     include_routers(app, prefix="/api/v1")
 
     return app
