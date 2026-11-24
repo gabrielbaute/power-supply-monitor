@@ -5,6 +5,7 @@ from fastapi import Depends, Query
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncGenerator, Optional
+from uuid import UUID
 
 from app.enums import UserRole, UserStatus
 from app.errors import AuthenticationError, PermissionDeniedError
@@ -158,7 +159,10 @@ async def get_current_user(
         )
 
         # 3. Recuperar usuario desde la base de datos
-        user = await user_service.controller.get_user_by_id(token_data.user_id) #type: ignore
+        if not token_data.user_id:
+            raise AuthenticationError(message="Token sin identificador de usuario")
+
+        user = await user_service.controller.get_user_by_id(UUID(token_data.user_id)) #type: ignore
 
         if user is None:
             raise ResourceNotFoundError(
