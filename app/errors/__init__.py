@@ -11,6 +11,7 @@ from app.errors.mail_errors import (
     SendMailError,
     TemplateMailNotFound
 )
+from app.errors.notifications_error import NTFYNotificationError
 from app.errors.user_errors import (
     PermissionDeniedError,
     ResourceNotFoundError,
