@@ -45,7 +45,7 @@ class ErrorHandlerRegistry:
             SMTPConnectionError: status.HTTP_503_SERVICE_UNAVAILABLE,
             SendMailError: status.HTTP_500_INTERNAL_SERVER_ERROR,
             TemplateMailNotFound: status.HTTP_500_INTERNAL_SERVER_ERROR,
-            TimezoneRequiredError: status.HTTP_422_UNPROCESSABLE_ENTITY,
+            TimezoneRequiredError: status.HTTP_422_UNPROCESSABLE_CONTENT,
             BuildMessageError: status.HTTP_500_INTERNAL_SERVER_ERROR,
         }
 
