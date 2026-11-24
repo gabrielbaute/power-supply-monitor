@@ -21,8 +21,12 @@ async def get_event_detail(
 
 @router.get("/history", response_model=ElectricEventListResponse)
 async def get_events_history(
-    start_date: datetime = Query(description="Fecha de inicio (YYYY-MM-DDTHH:MM:SS)."),
-    end_date: datetime = Query(description="Fecha de fin de la búsqueda (YYYY-MM-DDTHH:MM:SS)."),
+    start_date: datetime = Query(
+        description="Fecha de inicio con zona horaria (ej. 2026-11-01T00:00:00-04:00 o 2026-11-01T00:00:00Z)."
+    ),
+    end_date: datetime = Query(
+        description="Fecha de fin con zona horaria (ej. 2026-11-24T23:59:59-04:00 o 2026-11-24T23:59:59Z)."
+    ),
     skip: int = Query(0, ge=0, description="Registros a saltar en la paginación."),
     limit: int = Query(100, ge=1, le=1000, description="Máximo de registros a traer por petición."),
     electric_event_service: ElectricEventService = Depends(get_electric_event_service)
