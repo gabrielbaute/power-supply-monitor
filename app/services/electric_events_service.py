@@ -136,7 +136,22 @@ class ElectricEventService:
     ) -> ElectricEventListResponse:
         """
         Obtiene los eventos eléctricos para un rango de fecha determinado.
+
+        Args:
+            start_date (datetime): Fecha y hora de inicio con zona horaria.
+            end_date (datetime): Fecha y hora de fin con zona horaria.
+            skip (int): Registros a omitir en la paginación.
+            limit (int): Máximo de registros a retornar.
+
+        Returns:
+            ElectricEventListResponse: Lista paginada de eventos y conteo total.
+
+        Raises:
+            TimezoneRequiredError: Si start_date o end_date no incluyen zona horaria.
         """
+        self._ensure_timezone_aware(start_date, "start_date")
+        self._ensure_timezone_aware(end_date, "end_date")
+
         event_registers = await self.controller.get_events_by_date_range(
             start_date=start_date,
             end_date=end_date,
